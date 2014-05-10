@@ -1,6 +1,7 @@
 from http.server import BaseHTTPRequestHandler
 import os
 from glbl import *
+import cgi
 
 class MyHandler(BaseHTTPRequestHandler):
 
@@ -28,8 +29,12 @@ class MyHandler(BaseHTTPRequestHandler):
 			print('Do Get Error')
 
 	def do_POST(self):
+		postvars={}
 		try:
 			print('Do Post')
+			content_len = int(self.headers.getheader('content-length'))
+			post_body = self.rfile.read(content_len)
+			print ('POST VAR:' ,post_body)
 
 		except IOError as e :
 			print('Do Post Error')
