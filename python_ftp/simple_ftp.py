@@ -5,7 +5,6 @@ from http.server import HTTPServer
 
 import os
 from MyHandler import *
-xx = "eh"
 
 def f(name):
 	print('hello', name)
