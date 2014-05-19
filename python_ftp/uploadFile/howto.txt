@@ -1,0 +1,3 @@
+curl -X POST -F "user=asd" -F "command=expect" -F "filename=uwotm8000.jpg" http://localhost:8080
+
+curl -X POST -F "command=setfile" -F "filename=uwotm8000.jpg" -F "filedata=@images.jpg" http://localhost:8080

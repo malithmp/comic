@@ -19,11 +19,12 @@ import math
 
 # README: For multiprocessing synchronization using locks : https://docs.python.org/dev/library/multiprocessing.html : TOPIC 17.2.1.4. Synchronization between processes
 
-expireExpectingID = dequeue()	
+expireExpectingID = deque()	
 expectingID  = {}
 allFilesOnDisk = {}
 
-fileExpiryTime = # Expiry for an expecting file (time between the user tells the FE a file is on the way to the last moment this File server will hang on to that filename
+# Expiry for an expecting file (time between the user tells the FE a file is on the way to the last moment this File server will hang on to that filename
+fileExpiryTime = 10
 
 def expectingIDExpire():
 	if(len(expireExpectingID) is not 0):
@@ -31,10 +32,14 @@ def expectingIDExpire():
 		current_time = int(time.time())
 		first_on_stack = expireExpectingID.popleft()
 		hasMoar = True
-		while (hasMoar and (fist_on_stack[0] > current_time)):
+		#print('what:', first_on_stack[0])
+		#print('vs:', current_time)
+		
+		while (hasMoar and (first_on_stack[0] < current_time)):
 			try:
 				# The file may already be popped if the user uploaded it before expiry,
 				del expectingID[first_on_stack[1]]
+				print('deleting expired')
 			except: 
 				# IF already deleted, proceed
 				pass
@@ -52,12 +57,13 @@ def expectingIDExpire():
 		return True
 
 
+def isExpectingID(resourceID):
+	return resourceID in expectingID
 
 def popExpectingID(resourceID):
 	# remove file from the epecting file list (this is called when a expecting file was received)
 
 	#################################################
-	### before every action we check expired files###
 	expectingIDExpire()
 	#################################################
 
@@ -71,7 +77,6 @@ def pushExpectingID(resourceID):
 	# Add fileID to the expecting files list
 
 	#################################################
-	### before every action we check expired files###
 	expectingIDExpire()
 	#################################################
 
@@ -85,11 +90,6 @@ def pushExpectingID(resourceID):
 		return True
 
 def putFile(resourceID):
-	#################################################
-	### before every action we check expired files###
-	expectingIDExpire()
-	#################################################
-
 	if(resourceID in allFilesOnDisk):
 		return False
 	else:
@@ -97,11 +97,6 @@ def putFile(resourceID):
 		return True
 	
 def removeFile(resourceID):
-
-	#################################################
-	### before every action we check expired files###
-	expectingIDExpire()
-	#################################################
 	if(resourceID not in allFilesOnDisk):
 		return False
 	else:
@@ -109,12 +104,6 @@ def removeFile(resourceID):
 		return True
 	
 def hasFile(resourceID):
-
-	#################################################
-	### before every action we check expired files###
-	expectingIDExpire()
-	#################################################
-
 	return resourceID in allFilesOnDisk
 
 

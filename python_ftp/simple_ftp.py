@@ -12,7 +12,6 @@ def f(name):
 
 
 def main():
-	pool = Pool(processes = 20 )
 	result = pool.apply_async(f,['bob'])
 	#p = Process(target=f, args=('bob',))
 	print ('main guy', str(os.getpid()))	
