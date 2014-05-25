@@ -60,6 +60,26 @@ http.createServer(function (req, res) {
 				}
     			
     			// Now we need to communicate with Auth server
+    			// Pass on the username, password and email as a post request to Auth server
+				var options = {
+				    host: '127.0.0.1',
+				    port: 1338,
+				    path: '/',
+				    method: 'POST',
+				    headers: {
+				        'Content-Type': 'text/plain'
+				    }
+				};
+				// connect to the Auth server
+				console.log('Connecting to auth server.....');
+				var authServerRequest = http.request(options, function(authServerResponse) {
+					
+					//Successfully made connection to auth server, now I need to pass in data
+				});
+
+				//authServerRequest.write("BLAH!");
+				//authServerRequest.end();
+
 				//res.writeHead(200, {'Content-Type': 'text/plain'});
     			//res.end('Login Successful\n');
        		}
@@ -87,6 +107,8 @@ http.createServer(function (req, res) {
     }
     // Default case if everything goes well
  	res.writeHead(200, {'Content-Type': 'text/plain'});
-  	res.end('I am the Front End Server\n');
+  	res.end('In the end.... I am the Front End Server\n');
 }).listen(1337, '127.0.0.1');
 console.log('front end Server running at http://127.0.0.1:1337/');
+
+
