@@ -65,18 +65,15 @@ http.createServer(function (req, res) {
 				    host: '127.0.0.1',
 				    port: 1338,
 				    path: '/',
-				    method: 'POST',
-				    headers: {
-				        'Content-Type': 'text/plain'
-				    }
+				    method: 'POST'
 				};
 				// connect to the Auth server
 				console.log('Connecting to auth server.....');
 				var authServerRequest = http.request(options, function(authServerResponse) {
 					
 					//Successfully made connection to auth server, now I need to pass in data
+					
 				});
-
 				//authServerRequest.write("BLAH!");
 				//authServerRequest.end();
 
