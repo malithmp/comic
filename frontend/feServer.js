@@ -82,16 +82,98 @@ http.createServer(function (req, res) {
 			authServerRequest.end();
 
 		}
+
+		// We will be sent a password (all plain text at this point), and deserialize this data
+		// Example url: http://127.0.0.1:1338/?queryType=signin&password=hagu2014
+		
 		else if(queryData.queryType == "signin")
 		{
     		// Take action to communicate with Auth server to take necessary action
     		// Parse the rest of the attributes
-    		// Notify client that this is a sign ip session
-    		console.log('This is a sign in session.............');	
+    		// Notify client that this is a sign in session
+
+    		console.log('This is a sign in session.............');
+
+    		// Now we may have to do password encryption/decryption here, but for now just check
+			if(queryData.password)
+			{
+				console.log('Password: ' + queryData.password);
+				// Pass this password to the auth server
+				var options = {
+				    host: '127.0.0.1',
+				    port: 1338,
+				    path: req.url,
+				    method: 'POST'
+				};
+			
+				// connect to the Auth server
+				console.log('Connecting to auth server.....');
+				console.log(req.url);
+				var authServerRequest = http.request(options, function(authServerResponse) {
+					
+					// Successfully made connection to auth server
+					// Now we check the response to see if it is a valid password
+					// if so, notify user about successful login
+					// if not, notify about failure				
+				});
+				//authServerRequest.write("BLAH!");				
+				// We MUST ALWAYS terminate request with this method
+				authServerRequest.end();
+
+			}
+			else
+			{
+				errorMessage('no password specified', 400, res);
+			}
 		}
+		// We will be sent a secret key (all plain text at this point), and deserialize this data
+		// Example url: http://127.0.0.1:1338/?queryType=verification&secretkey=abcd
+		
 		else if(queryData.queryType == "verification")
 		{
+			
+			// Take action to communicate with Auth server to take necessary action
+    		// Parse the rest of the attributes
+    		// Notify client that this is a sign in session
 			console.log('This is a verification session.............');
+
+    		// Now we may have to do password encryption/decryption here, but for now just check
+			if(queryData.secretkey)
+			{
+				console.log('Secret Key: ' + queryData.secretkey);
+				// Pass this key to the auth server
+				// NOT SURE IF THIS IS POST/GET
+				var options = {
+				    host: '127.0.0.1',
+				    port: 1338,
+				    path: req.url,
+				    method: 'POST'
+				};
+			
+				// connect to the Auth server
+				console.log('Connecting to auth server.....');
+				console.log(req.url);
+				var authServerRequest = http.request(options, function(authServerResponse) {
+					
+					// Successfully made connection to auth server
+					// Now we check the response to see if the emailed link has expired or not
+					// if it didn't, the user is officially IN
+					// if not, notify about failure, and ask him to sign up again				
+				});
+				//authServerRequest.write("BLAH!");				
+				// We MUST ALWAYS terminate request with this method
+				authServerRequest.end();
+			}
+			else
+			{
+				errorMessage('no secretkey specified', 400, res);
+			}
+
+		}
+		else if(queryData.queryType == "uploadPicture")
+		{
+			console.log('This is the picture upload session.....');
+			// This is not implemented yet since we need to determine a protocol to communicate with Python FTP server
 		}
 		else
 		{
