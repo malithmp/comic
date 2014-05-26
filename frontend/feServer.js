@@ -8,13 +8,6 @@ var querystring = require('querystring');
 http.createServer(function (req, res) {
 	
 	// This is the frontend server, so we need to parse all the incoming requests and appropriately relay it to other servers
-	/*
-	
-	querystring.parse('foo=bar&baz=qux&baz=quux&corge')
-	// returns
-	{ foo: 'bar', baz: ['qux', 'quux'], corge: '' }
-	*/
-
 	// Get a json representation on url
 	var queryData = url.parse(req.url, true).query;
 	// get each key value pair of attributes, and take necesssary actions
@@ -81,10 +74,12 @@ http.createServer(function (req, res) {
 			console.log(req.url);
 			var authServerRequest = http.request(options, function(authServerResponse) {
 				
-				// Successfully made connection to auth server, now I need to pass in data
-				// Since method is POST, we are already doing so....
-				
+				// Successfully made connection to auth server				
 			});
+
+			//authServerRequest.write("BLAH!");				
+			// We MUST ALWAYS terminate request with this method
+			authServerRequest.end();
 
 		}
 		else if(queryData.queryType == "signin")
@@ -107,34 +102,6 @@ http.createServer(function (req, res) {
 	{
 		errorMessage('no queryType specified', 400, res);
 	}
-
-	//////////////////////////////////////
-	/*
-	
-    			// Now we need to communicate with Auth server
-    			// Pass on the username, password and email as a post request to Auth server
-				var options = {
-				    host: '127.0.0.1',
-				    port: 1338,
-				    path: req.url,
-				    method: 'POST'
-				};
-				// connect to the Auth server
-				console.log('Connecting to auth server.....');
-				console.log(req.url);
-				var authServerRequest = http.request(options, function(authServerResponse) {
-					
-					//Successfully made connection to auth server, now I need to pass in data
-					
-				});
-				//authServerRequest.write("BLAH!");
-				//authServerRequest.end();
-
-				//res.writeHead(200, {'Content-Type': 'text/plain'});
-    			//res.end('Login Successful\n');
-    
-    */
-
     // Default case if everything goes well
  	res.writeHead(200, {'Content-Type': 'text/plain'});
   	res.end('In the end.... I am the Front End Server\n');
