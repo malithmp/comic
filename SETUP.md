@@ -10,7 +10,7 @@ REDIS: Source: http://redis.io/topics/quickstart
 		make	
 
 	RUN:
-		redis-server (if path not set,server executable is found in blahblah/redis-stable/src)
+		./redis-server (if path not set,server executable is found in blahblah/redis-stable/src)
 	
 	WORTH MENTIONING:
 		#Redis by default runs without a config file. With out that we cant specify when to backup data
