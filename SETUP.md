@@ -20,7 +20,7 @@ REDIS: Source: http://redis.io/topics/quickstart
 		wget http://download.redis.io/redis-stable/redis.conf 
 
 		#Start redis with this config file
-		redis-server blahblah/redis-conf
+		./redis-server blahblah/redis-conf
 
 MYSQL: Source: http://dev.mysql.com/doc/refman/5.1/en/linux-installation-native.html
 	INSTALLATION:
