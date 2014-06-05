@@ -84,7 +84,7 @@ http.createServer(function (req, res) {
 		}
 
 		// We will be sent a password (all plain text at this point), and deserialize this data
-		// Example url: http://127.0.0.1:1338/?queryType=signin&password=hagu2014
+		// Example url: http://127.0.0.1:1337/?queryType=signin&password=hagu2014
 		
 		else if(queryData.queryType == "signin")
 		{
@@ -127,7 +127,7 @@ http.createServer(function (req, res) {
 			}
 		}
 		// We will be sent a secret key (all plain text at this point), and deserialize this data
-		// Example url: http://127.0.0.1:1338/?queryType=verification&secretkey=abcd
+		// Example url: http://127.0.0.1:1337/?queryType=verification&secretkey=abcd
 		
 		else if(queryData.queryType == "verification")
 		{
@@ -170,9 +170,48 @@ http.createServer(function (req, res) {
 			}
 
 		}
+
+		// We will be sent a secret key (all plain text at this point), and deserialize this data
+		// Example url: http://127.0.0.1:1337/?queryType=signout&username=sampritr&token=1234
+		
+		else if(queryData.queryType == "signout")
+		{
+			console.log('This is a signout session.....');
+			// In reality, we will have a username and a token as params (but let's skip token for now)
+			if(queryData.username)
+			{
+				console.log('Username: ' + queryData.username);
+				// Pass this key to the auth server
+				// NOT SURE IF THIS IS POST/GET
+				var options = {
+				    host: '127.0.0.1',
+				    port: 1338,
+				    path: req.url,
+				    method: 'POST'
+				};
+			
+				// connect to the Auth server
+				console.log('Connecting to auth server.....');
+				console.log(req.url);
+				var authServerRequest = http.request(options, function(authServerResponse) {
+					
+					// Successfully made connection to auth server
+					// Now we check the response to see if the emailed link has expired or not
+					// if it didn't, the user is officially IN
+					// if not, notify about failure, and ask him to sign up again				
+				});
+				//authServerRequest.write("BLAH!");				
+				// We MUST ALWAYS terminate request with this method
+				authServerRequest.end();
+			}
+			else
+			{
+				errorMessage('no username specified', 400, res);
+			}
+		}
 		else if(queryData.queryType == "uploadPicture")
 		{
-			console.log('This is the picture upload session.....');
+			console.log('This is a picture upload session.....');
 			// This is not implemented yet since we need to determine a protocol to communicate with Python FTP server
 		}
 		else
