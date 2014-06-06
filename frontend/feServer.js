@@ -74,10 +74,32 @@ http.createServer(function (req, res) {
 			console.log(req.url);
 			var authServerRequest = http.request(options, function(authServerResponse) {
 				
-				// Successfully made connection to auth server				
-			});
-
-			//authServerRequest.write("BLAH!");				
+				// Successfully made connection to auth server
+				// Print contents of the response received
+  				displayResponse(authServerResponse); 
+  				
+  				if(authServerResponse.statusCode == 200)
+  				{
+  					// Great
+					authServerResponse.on('data', function (chunk) {
+   						if(chunk.statusCode == 0)
+   						{
+   							console.log('signup successful');
+   						}
+   						else
+   						{
+   							console.log('signup failed');	
+   						}
+						// append the JSON string to the end of the feServer response
+   						writeResponse(res, authServerResponse.statusCode, chunk);
+	  				});
+  				}
+  				else
+  				{
+  					console.log('auth Server didnt respond correctly');
+  					writeResponse(res, authServerResponse.statusCode, chunk);
+  				}
+			});				
 			// We MUST ALWAYS terminate request with this method
 			authServerRequest.end();
 
@@ -114,9 +136,34 @@ http.createServer(function (req, res) {
 					// Successfully made connection to auth server
 					// Now we check the response to see if it is a valid password
 					// if so, notify user about successful login
-					// if not, notify about failure				
-				});
-				//authServerRequest.write("BLAH!");				
+					// if not, notify about failure
+
+					// Print contents of the response received
+	  				displayResponse(authServerResponse); 
+	  				
+	  				if(authServerResponse.statusCode == 200)
+	  				{
+	  					// Great
+						authServerResponse.on('data', function (chunk) {
+	   						if(chunk.statusCode == 0)
+	   						{
+	   							console.log('signin successful');
+	   						}
+	   						else
+	   						{
+	   							console.log('signin failed');	
+	   						}
+							// append the JSON string to the end of the feServer response
+	   						writeResponse(res, authServerResponse.statusCode, chunk);
+		  				});
+	  				}
+	  				else
+	  				{
+	  					console.log('auth Server didnt respond correctly');
+	  					writeResponse(res, authServerResponse.statusCode, chunk);
+	  				}
+
+				});			
 				// We MUST ALWAYS terminate request with this method
 				authServerRequest.end();
 
@@ -158,9 +205,34 @@ http.createServer(function (req, res) {
 					// Successfully made connection to auth server
 					// Now we check the response to see if the emailed link has expired or not
 					// if it didn't, the user is officially IN
-					// if not, notify about failure, and ask him to sign up again				
-				});
-				//authServerRequest.write("BLAH!");				
+					// if not, notify about failure, and ask him to sign up again
+					// In either case, we might have to do some stuff in MySQL/Redis
+
+					// Print contents of the response received
+	  				displayResponse(authServerResponse); 
+
+	  				if(authServerResponse.statusCode == 200)
+	  				{
+	  					// Great
+						authServerResponse.on('data', function (chunk) {
+	   						if(chunk.statusCode == 0)
+	   						{
+	   							console.log('verification successful');
+	   						}
+	   						else
+	   						{
+	   							console.log('verification failed');	
+	   						}
+							// append the JSON string to the end of the feServer response
+	   						writeResponse(res, authServerResponse.statusCode, chunk);
+		  				});
+	  				}
+	  				else
+	  				{
+	  					console.log('auth Server didnt respond correctly');
+	  					writeResponse(res, authServerResponse.statusCode, chunk);
+	  				}				
+				});			
 				// We MUST ALWAYS terminate request with this method
 				authServerRequest.end();
 			}
@@ -196,9 +268,30 @@ http.createServer(function (req, res) {
 				var authServerRequest = http.request(options, function(authServerResponse) {
 					
 					// Successfully made connection to auth server
-					// Now we check the response to see if the emailed link has expired or not
-					// if it didn't, the user is officially IN
-					// if not, notify about failure, and ask him to sign up again				
+					// Might have to do something here for signout?
+					// Print contents of the response received
+	  				displayResponse(authServerResponse); 
+	  				if(authServerResponse.statusCode == 200)
+	  				{
+	  					// Great
+						authServerResponse.on('data', function (chunk) {
+	   						if(chunk.statusCode == 0)
+	   						{
+	   							console.log('signout successful');
+	   						}
+	   						else
+	   						{
+	   							console.log('signout failed');	
+	   						}
+							// append the JSON string to the end of the feServer response
+	   						writeResponse(res, authServerResponse.statusCode, chunk);
+		  				});
+	  				}
+	  				else
+	  				{
+	  					console.log('auth Server didnt respond correctly');
+	  					writeResponse(res, authServerResponse.statusCode, chunk);
+	  				}				
 				});
 				//authServerRequest.write("BLAH!");				
 				// We MUST ALWAYS terminate request with this method
@@ -224,8 +317,8 @@ http.createServer(function (req, res) {
 		errorMessage('no queryType specified', 400, res);
 	}
     // Default case if everything goes well
- 	res.writeHead(200, {'Content-Type': 'text/plain'});
-  	res.end('In the end.... I am the Front End Server\n');
+ 	//res.writeHead(200, {'Content-Type': 'text/plain'});
+  	//res.end('In the end.... I am the Front End Server\n');
 }).listen(1337, '127.0.0.1');
 console.log('front end Server running at http://127.0.0.1:1337/');
 
@@ -252,4 +345,24 @@ function validateUsername(username, response)
 	{	
 		errorMessage('Username invalid', 400, response);
 	}
+}
+
+function writeResponse(response, statusCode, JSONresponse)
+{
+	response.writeHead(statusCode, {'Content-Type': 'text/plain'});
+	response.write(JSON.stringify(JSONresponse));
+	response.end();	
+}
+
+function displayResponse(response)
+{
+	console.log('--------------');
+	console.log('Contents of the response:');
+	console.log('STATUS: ' + response.statusCode);
+	console.log('HEADERS: ' + JSON.stringify(response.headers));
+  	response.setEncoding('utf8');
+  	response.on('data', function (chunk) {
+   		console.log('BODY: ' + chunk);
+   		console.log('--------------');
+  	});
 }
