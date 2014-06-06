@@ -1,0 +1,4 @@
+Create a script to test auth functionalities
+in signin check for existing tokens first, if its there, then check username password, if it matches too, then give the user the previous token and update expiry
+AUTH token expiry time extension (if token is used before expiration
+
