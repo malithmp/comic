@@ -148,6 +148,7 @@ http.createServer(function (req, res) {
 	   						if(chunk.statusCode == 0)
 	   						{
 	   							console.log('signin successful');
+	   							// Upon success, we are expecting a hex token
 	   						}
 	   						else
 	   						{
