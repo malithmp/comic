@@ -10,7 +10,7 @@ REDIS: Source: http://redis.io/topics/quickstart
 		make	
 
 	RUN:
-		redis-server (if path not set,server executable is found in blahblah/redis-stable/src)
+		./redis-server (if path not set,server executable is found in blahblah/redis-stable/src)
 	
 	WORTH MENTIONING:
 		#Redis by default runs without a config file. With out that we cant specify when to backup data
@@ -20,7 +20,7 @@ REDIS: Source: http://redis.io/topics/quickstart
 		wget http://download.redis.io/redis-stable/redis.conf 
 
 		#Start redis with this config file
-		redis-server blahblah/redis-conf
+		./redis-server blahblah/redis-conf
 
 MYSQL: Source: http://dev.mysql.com/doc/refman/5.1/en/linux-installation-native.html
 	INSTALLATION:
