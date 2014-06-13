@@ -3,7 +3,18 @@ var sys = require("sys");
 var url = require("url");
 var path = require("path");  
 var util = require('util');
+var express = require('express');
 var querystring = require('querystring');
+var crypto = require('crypto');
+var redis = require("redis");
+
+ 
+var generate_key = function() {
+    var sha = crypto.createHash('sha256');
+    sha.update(Math.random().toString());
+    return sha.digest('hex');
+};
+
 
 http.createServer(function (req, res) {
 	
@@ -13,9 +24,10 @@ http.createServer(function (req, res) {
 	// get each key value pair of attributes, and take necesssary actions
 	// Eventually we will append messages to the end of this string and send a huge ass string as res.end, containing lots of information 
 	var responseString;
-	
+
 	// We need to review our protocol, first parameter will be 'queryType'
-	// Does the queryType exist?
+	// Does the queryType exist?	
+
 	if(queryData.queryType)
 	{
 		// Let's handle the signup case first
@@ -139,7 +151,10 @@ http.createServer(function (req, res) {
 					// if not, notify about failure
 
 					// Print contents of the response received
-	  				displayResponse(authServerResponse); 
+	  				displayResponse(authServerResponse);
+
+	  				// We will get a token back in the body, which we cache in redis
+	  				// And also write to HTTP response to the client 
 	  				
 	  				if(authServerResponse.statusCode == 200)
 	  				{
@@ -279,6 +294,7 @@ http.createServer(function (req, res) {
 	   						if(chunk.statusCode == 0)
 	   						{
 	   							console.log('signout successful');
+	   							//TODO: Remove the session id from redis
 	   						}
 	   						else
 	   						{
@@ -367,3 +383,4 @@ function displayResponse(response)
    		console.log('--------------');
   	});
 }
+
