@@ -24,12 +24,21 @@ http.createServer(function (req, res) {
 	// get each key value pair of attributes, and take necesssary actions
 	// Eventually we will append messages to the end of this string and send a huge ass string as res.end, containing lots of information 
 	var responseString;
+	var redisClient = redis.createClient();
 
+	var JSONresponse = {
+		"statusCode": 0,
+		"message": "success"
+	}
+	var signinToken = null;
 	// We need to review our protocol, first parameter will be 'queryType'
-	// Does the queryType exist?	
+	// Does the queryType exist?
 
+	console.log(JSONresponse.statusCode);
+	// FE will look for the login token before proceeding with anything	
 	if(queryData.queryType)
 	{
+
 		// Let's handle the signup case first
 		// We will be sent a user name and password and email(all plain text at this point), and deserialize this data
 		// Example url: http://127.0.0.1:1337/?queryType=signup&username=sampritr&password=hagu2014&email=srshirsho@gmail.com
@@ -94,6 +103,7 @@ http.createServer(function (req, res) {
   				{
   					// Great
 					authServerResponse.on('data', function (chunk) {
+						chunk = JSON.parse(chunk);
    						if(chunk.statusCode == 0)
    						{
    							console.log('signup successful');
@@ -118,17 +128,51 @@ http.createServer(function (req, res) {
 		}
 
 		// We will be sent a password (all plain text at this point), and deserialize this data
-		// Example url: http://127.0.0.1:1337/?queryType=signin&password=hagu2014
+		// Example url: http://127.0.0.1:1337/?queryType=signin&username=sampritr&password=hagu2014&signinToken=0
 		
 		else if(queryData.queryType == "signin")
 		{
     		// Take action to communicate with Auth server to take necessary action
     		// Parse the rest of the attributes
     		// Notify client that this is a sign in session
+    		// TODO Now I really need to refactor the URL param thing
 
     		console.log('This is a sign in session.............');
 
     		// Now we may have to do password encryption/decryption here, but for now just check
+			if(queryData.username)
+			{
+				console.log('Username: ' + queryData.username);
+				validateUsername(queryData.username);
+			}
+			else
+			{
+				errorMessage('no username specified', 400, res);
+			}
+			///////////////////////////////////////////////////////////
+			if(queryData.signinToken)
+			{
+				// If first time sign in, signinToken is assigned 0
+				// If not, we try getting in from redis
+				// TODO If we can't find it, then we ask the user to fuck off, or look for it in MySQL?
+				signinToken = getToken(queryData.username, queryData.signinToken, redisClient);
+				if(signinToken == null)
+				{
+					// Tell the user to fuck off
+					//function writeResponse(response, statusCode, JSONresponse)
+					//console.log(JSONresponse.statusCode);
+					JSONresponse.statusCode = -50; // Let's say -50 is for invalid token
+					JSONresponse.message = "invalid signinToken";
+					writeResponse(res, JSONresponse.statusCode, JSONresponse);
+				}
+				// if we've made it here, we can later get signinToken from auth server and cache in redis
+			}
+			else
+			{
+				errorMessage('no signinToken specified', 400, res);
+			}
+
+			//////////////////////////////////////////////////////////
 			if(queryData.password)
 			{
 				console.log('Password: ' + queryData.password);
@@ -151,6 +195,7 @@ http.createServer(function (req, res) {
 					// if not, notify about failure
 
 					// Print contents of the response received
+	  				//console.log(authServerResponse);
 	  				displayResponse(authServerResponse);
 
 	  				// We will get a token back in the body, which we cache in redis
@@ -159,11 +204,28 @@ http.createServer(function (req, res) {
 	  				if(authServerResponse.statusCode == 200)
 	  				{
 	  					// Great
+	  					
 						authServerResponse.on('data', function (chunk) {
-	   						if(chunk.statusCode == 0)
+							
+							chunk = JSON.parse(chunk);
+							if(chunk.statusCode == 0)
 	   						{
 	   							console.log('signin successful');
-	   							// Upon success, we are expecting a hex token
+	   							// Get signinToken from auth server
+	   							// Upon success, we are expecting a hex token from authServer
+	   							signinToken = chunk.message;
+ 								
+ 								// TODO Cache the signinToken in redis, we might have to check expiration later (make a separate function)
+                                redisClient.set(queryData.username, signinToken, function(error, result) {
+                                    if (error) console.log('Error: ' + error);
+                                    else console.log('Successfully cached username and signinToken in redis');
+                                });
+
+                                // TODO check to see if we can get it, will remove it later
+                                redisClient.get(queryData.username, function(error, result) {
+                                    if (error) console.log('Error: '+ error);
+                                    else console.log('username:' + queryData.username + ', signinToken: ' + result);
+                                });
 	   						}
 	   						else
 	   						{
@@ -172,6 +234,7 @@ http.createServer(function (req, res) {
 							// append the JSON string to the end of the feServer response
 	   						writeResponse(res, authServerResponse.statusCode, chunk);
 		  				});
+
 	  				}
 	  				else
 	  				{
@@ -226,11 +289,11 @@ http.createServer(function (req, res) {
 
 					// Print contents of the response received
 	  				displayResponse(authServerResponse); 
-
 	  				if(authServerResponse.statusCode == 200)
 	  				{
 	  					// Great
 						authServerResponse.on('data', function (chunk) {
+	   						chunk = JSON.parse(chunk);
 	   						if(chunk.statusCode == 0)
 	   						{
 	   							console.log('verification successful');
@@ -269,6 +332,27 @@ http.createServer(function (req, res) {
 			if(queryData.username)
 			{
 				console.log('Username: ' + queryData.username);
+			}
+			else
+			{
+				errorMessage('no username specified', 400, res);
+			}
+			if(queryData.signinToken)
+			{
+				// If first time sign in, signinToken is assigned 0
+				// If not, we try getting in from redis
+				// If we can't find it, then we ask the user to fuck off
+				signinToken = getToken(queryData.username, queryData.signinToken, redisClient);
+				if(signinToken == null)
+				{
+					// TODO Tell the user to fuck off, or look for it in MySQL
+					//function writeResponse(response, statusCode, JSONresponse)
+					//console.log(JSONresponse.statusCode);
+					JSONresponse.statusCode = -50; // Let's say -50 is for invalid token
+					JSONresponse.message = "invalid signinToken";
+					writeResponse(res, JSONresponse.statusCode, JSONresponse);
+				}
+				// If token exists, move on
 				// Pass this key to the auth server
 				// NOT SURE IF THIS IS POST/GET
 				var options = {
@@ -291,6 +375,7 @@ http.createServer(function (req, res) {
 	  				{
 	  					// Great
 						authServerResponse.on('data', function (chunk) {
+							chunk = JSON.parse(chunk);
 	   						if(chunk.statusCode == 0)
 	   						{
 	   							console.log('signout successful');
@@ -316,8 +401,9 @@ http.createServer(function (req, res) {
 			}
 			else
 			{
-				errorMessage('no username specified', 400, res);
+				errorMessage('no signinToken specified', 400, res);
 			}
+			
 		}
 		else if(queryData.queryType == "uploadPicture")
 		{
@@ -384,3 +470,28 @@ function displayResponse(response)
   	});
 }
 
+
+function getToken(username, signinToken, redisClient)
+{
+	if(signinToken == 0)
+	{
+		console.log('signinToken is 0, first time entry');
+		return signinToken;
+	}
+	else // compare with redis store
+	{
+		redisClient.get(username, function(error, result) {
+			if (error) 
+			{
+				// TODO We might have to go check MySQL here instead of directly reporting error
+				console.log('Error: '+ error);
+				return null;
+            }
+            else 
+           	{ 
+           	  	console.log('username:' + username + ', signinToken: ' + result);
+               	return result;
+            }
+        });
+	}
+}
