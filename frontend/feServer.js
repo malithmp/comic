@@ -156,6 +156,7 @@ http.createServer(function (req, res) {
 				// If not, we try getting in from redis
 				// TODO If we can't find it, then we ask the user to fuck off, or look for it in MySQL?
 				signinToken = getToken(queryData.username, queryData.signinToken, redisClient);
+				// Error check
 				if(signinToken == null)
 				{
 					// Tell the user to fuck off
@@ -343,7 +344,14 @@ http.createServer(function (req, res) {
 				// If not, we try getting in from redis
 				// If we can't find it, then we ask the user to fuck off
 				signinToken = getToken(queryData.username, queryData.signinToken, redisClient);
-				if(signinToken == null)
+				// Error check
+				if(signinToken == 0)
+				{
+					JSONresponse.statusCode = -50; // Let's say -50 is for invalid token
+					JSONresponse.message = "invalid signinToken: Cannot have signinToken 0 for signout";
+					writeResponse(res, JSONresponse.statusCode, JSONresponse);
+				}
+				else if(signinToken == null)
 				{
 					// TODO Tell the user to fuck off, or look for it in MySQL
 					//function writeResponse(response, statusCode, JSONresponse)
@@ -395,7 +403,6 @@ http.createServer(function (req, res) {
 	  					writeResponse(res, authServerResponse.statusCode, chunk);
 	  				}				
 				});
-				//authServerRequest.write("BLAH!");				
 				// We MUST ALWAYS terminate request with this method
 				authServerRequest.end();
 			}
@@ -471,27 +478,80 @@ function displayResponse(response)
 }
 
 
-function getToken(username, signinToken, redisClient)
+function getToken(username, signinToken, redisClient) 
 {
-	if(signinToken == 0)
+	if(signinToken == 0) 
 	{
 		console.log('signinToken is 0, first time entry');
 		return signinToken;
 	}
-	else // compare with redis store
+	else 
 	{
+		// compare with redis store, if not available, ask auth Server 
 		redisClient.get(username, function(error, result) {
-			if (error) 
+			if(error) 
 			{
-				// TODO We might have to go check MySQL here instead of directly reporting error
 				console.log('Error: '+ error);
-				return null;
+				console.log('Token not found in Redis, will look at authServer');
+				// If not found in redis, we will ask authServer to look for it in backend database
+				// TODO We might have to go check MySQL here instead of directly reporting error
+				return getTokenFromAuth(username, signinToken);
             }
             else 
-           	{ 
+            { 
            	  	console.log('username:' + username + ', signinToken: ' + result);
                	return result;
             }
         });
 	}
 }
+
+
+function getTokenFromAuth(username, signinToken)
+{
+
+	var options = {
+	    host: '127.0.0.1',
+	    port: 1338,
+	    path: '?queryType=getToken&username=' + username + '&signinToken=' + signinToken,
+	    method: 'POST'
+	};
+
+				// connect to the Auth server
+	console.log('Connecting to auth server.....');
+	console.log(path);
+	var authServerRequest = http.request(options, function(authServerResponse) {
+		// Print contents of the response received
+		displayResponse(authServerResponse); 
+		if(authServerResponse.statusCode == 200) 
+		{
+				// Great
+			authServerResponse.on('data', function (chunk) {
+				chunk = JSON.parse(chunk);
+				if(chunk.statusCode == 0) 
+				{
+			   		if(chunk.message != null) 
+			   		{
+			   			console.log('Successfully fetched token from authServer');
+			   			return chunk.message;
+			   		}
+			   	}
+			   	else 
+			   	{
+			   		console.log('Failed to fetch token from authServer');
+			   		return null;	
+			   	}
+			});
+		} 
+		else 
+		{
+		  	console.log('auth Server didnt respond correctly');
+		 	return null;
+		}				
+	});
+	authServerRequest.end();
+}
+
+
+			
+				
