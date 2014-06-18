@@ -221,7 +221,16 @@ http.createServer(function (req, res) {
                                     if (error) console.log('Error: ' + error);
                                     else console.log('Successfully cached username and signinToken in redis');
                                 });
-
+                                
+                                // Expire after 900 seconds (15 minutes)
+                                redisClient.expire(queryData.username, 900, function(error, didSetExpiry){
+                                	if(didSetExpiry)
+                                		console.log('Successfully set expiry time on redis for key ', queryData.username);
+                                	else if(!didSetExpiry)
+                                		console.log('Key', queryData.username, 'does not exist on redis server');
+                                	else if(error)
+                                		console.log('Error: ' + error);
+                                });
                                 // TODO check to see if we can get it, will remove it later
                                 redisClient.get(queryData.username, function(error, result) {
                                     if (error) console.log('Error: '+ error);
