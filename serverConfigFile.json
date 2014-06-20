@@ -1,0 +1,28 @@
+{
+  "Servers":{
+    "feServer":{
+      "host": "localhost",
+      "port": 1337
+      },
+    
+    "authServer": {
+      "host": "localhost",
+      "port": 1338
+    },
+
+    "notifServer": {
+      "host": "localhost",
+      "port": 1339
+    },
+
+    "dbServer": {
+      "host": "localhost",
+      "port": 1340
+    },
+
+    "simpleFTPServer": {
+      "host": "localhost",
+      "port": 1341
+    }
+  }
+}
