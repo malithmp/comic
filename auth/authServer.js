@@ -1,37 +1,24 @@
 var http = require('http');
+var httprequester = require('request');
 var sys = require("sys");  
 var url = require("url");
 var path = require("path");  
 var util = require('util');
-var querystring = require('querystring');
-<<<<<<< HEAD
-var crypto = require('crypto');
-var generate_key = function() {
-		    var sha = crypto.createHash('sha256');
-		    sha.update(Math.random().toString());
-		    return sha.digest('hex');
-		};
-		
-=======
-var mysql = require('mysql');
->>>>>>> 899350a5d335c6e751b6bd0283f46f65f86ced12
+var redis = require('redis');
+var redisclient = redis.createClient();
+
+redisclient.select(2);
+redisclient.on('error',function(err){
+	console.log('Redis Error:'+err);
+});
 
 // Load configuration parameters
-var conf = parseConfigFile('config.txt');	
-//for (var k in conf){
-//	if(conf.hasOwnProperty(k)){
-//		console.log("key is: "+k+" Value is: "+conf[k]);
-//	}
-//}
-var mysqlconnection = mysql.createConnection({host:conf.host,user:conf.username,password:conf.password,database:conf.database});
-mysqlconnection.connect();
-
-//TODO mysqlconnection.escape to protect from sqlinjection
-// http://www.thegeekstuff.com/2014/01/mysql-nodejs-intro/
+var conf = parseConfig();	
 
 http.createServer(function (req, res) {
 	var queryData = url.parse(req.url, true).query;
 	console.log('Auth received a request: '+req.url);
+
 	if(queryData.querytype == 'verify'){
 	}
 	else if(queryData.querytype == 'signin'){
@@ -40,196 +27,185 @@ http.createServer(function (req, res) {
 	else if(queryData.querytype == 'signout'){
         }
         else if(queryData.querytype == 'signup'){
+		console.log("signup function calling");
+		queryDBSignup("unm1","eml1","pwd1","sec1","sec2","seca1","seca2",res);
         }
 	else{
 		//ignore
+		sendResponse(res,"-99","Invalid Protocol request to auth");
 	}
 	//res.writeHead(200, {'Content-Type': 'text/plain'});
 	//res.write('hashed:Sup bruh?\n');
 	//res.end('K THX BYE\n');
 	
-}).listen(1337, '127.0.0.1');
-//listen(1337,'192.168.0.150');
-//listen(1337, '127.0.0.1');
-console.log('auth Server running at http://127.0.0.1:1337/');
+}).listen(conf.auth_server_port,conf.auth_port_ip);
+console.log('auth Server running at http://'+conf.auth_server_ip+":"+conf.auth_server_port);
 
-<<<<<<< HEAD
-	if(queryData.queryType == "signup")
-	{
-		console.log('This is a signup session');
-		console.log('Username: ' + queryData.username);
-		console.log('Password: ' + queryData.password);
-		console.log('Email: ' + queryData.email);
-
-		///*
-		// RESPONSE: success/fail  and message (int Error Code)
-=======
-function queryBDSignup(username,email,password,secq1,secq2,seca1,seca2,res){
-	// Ask DB server (actual one) to create the usename. If it fails, it means the usename is already taken. send ero to user
-	// else, compute the hash and salt and add this new tiplet to the auth esrver's use_hash_salt table
-	
-	//TODO mock DB call: this should be a http request to the Backend Database
-	setTimeout(funtion(){
-		//mock http reuqest
-		var status=tue; // lets assume the username was accepted
-		if(status==true){
-			var crypto=require('crypto');
-			var salt = crypto.randomBytes(32).toString('hex'); // 64 chars = 256 bits
-			var hash=crypto.createHash('whirlpool').update(salt+password).digest('hex');
-			// add user credentials to the user_hash_salt table
-			queryString="insert into user_hash_salt values(null,\""+username+"\",\""+hash+"\",\""+salt+"\");";
-			mysqlconnection.query(queryString,function(err,rows){
-				if(){
+function queryDBgetToken(username){
+	//relay the message to the database. auth server does nothing here
+	httprequester.post('http://'+conf.db_server_ip+":"+conf.db_server_port+"/?queryType=getusertoken",{body:jsonstring},function(error,response,body){
+		if(!error){
+			var jsondata=JSON.parse(body);
+			if(jsondata.status=="true"){
+				var jsonstring=JSON.stringify({token:jsondata.token});
+				sendresponse(res,"0","tokentoken");
+			}
+			if(jsondata.status == "false"){
+				if(jsondata.message == "expired"){
+					// token was expired in the DB. it is now deleted
+					sendResponse(res,"-51","Token Expired. Login again");
+				}
+				else if(jsondata.message == "dne"){
+					sendResponse(res,"-50","Token Not Found. Login again");
+				}
+				else{
+					sendResponse(res,"-99","Server Internal Error. Internap protocol issue");
 				}
 			}
 		}
 		else{
-			sendResponse(res,"-10","Username already taken");
-		}
-	},300);
-}
->>>>>>> 899350a5d335c6e751b6bd0283f46f65f86ced12
-
-function queryDBSignin(username,password,res){
-	// get hash, salt combination for username provided
-	// if username does not exist return failure, else success`
-	var queryString = "select id,hash,salt from user_hash_salt where id=1;";
-	var crypto = require('crypto');	
-	mysqlconnection.query(queryString,function(err,rows){
-		if(err){
-			console.log("sql error!");
-		}else{
-			console.log(rows);
-			if(rows.length==1){
-				// We have a valid entry
-				// TODO Inorder to support multiple devices per user we need to add separate token entries to user_tokens table.  
-				// now hash the user's given password with the salt from db and compare against the hash in the db
-				// var listofhash=require('crypto').getHashes();
-				var generatedhash = crypto.createHash('whirlpool').update(rows[0].salt+password).digest('hex');
-				// TODO We should use a secure-random generator to generate a random token
-				// For now we will use the one provided by crypto assuming it IS secure (im not really sure)
-				if(generatedhash==rows[0].hash){
-					// signin succeeded. send token
-					try {
-						var buf = crypto.randomBytes(128);
-						var token = buf.toString('hex');
-						//console.log('Aww Yiss: '+ token);
-						// add the token to user_tokens table. drop if one exist currently (TODO not the case for multiple devices)
-						// for that case, we only update that token. for that we need more information suck as device mac address
-						queryString = "insert into user_tokens(userid,token)  values("+rows[0].id+",\""+token+"\") on duplicate key update token=values(token);";
-						console.log(queryString);
-						mysqlconnection.query(queryString,function(err,rows){
-							// Ok. new old token replaced by the new one
-							console.log("done adding token to user_tokens");
-							sendResponse(res,"30",token);
-						});
-					} catch (ex) {
-						console.log(ex);
-						// TODO: could not acquire a token. lie to user?
-						// most likely, entropy sources are drained
-						sendResponse(res,"-32","Server Internal Error: Entrophy sources depleted!");
-					}
-				}else{
-					//signin failed. Incorrect password 
-					console.log("Incorrect password");
-					sendResponse(res,"-30","Check username and password");
-				}
-			}else{
-				console.log("User not in database");
-				sendResponse(res,"-30","Check username and password!");
-			}
+			sendResponse(res,"-99","Server Internal Error: BE DB Did not respond. Could not get the token");
 		}
 	});
 }
 
-<<<<<<< HEAD
-		// if fail (probably username taken), then add the following
-		JSONresponse.statusCode = -10;
-		JSONresponse.message = "username taken";
-		
-		// Insert checks for 404 NOT FOUND errors if you think they may occur
-		// In the end return JSON string as response
-		res.writeHead(200, {'Content-Type': 'text/plain'});
-		res.write(JSON.stringify(JSONresponse));
-		res.end();
-		//*/
-	}
-	
-	if(queryData.queryType == "signout")
-	{
-		console.log('This is a signout session');
-		console.log('Username: ' + queryData.username);
-		///*
-		// if signout fail
-		JSONresponse.statusCode = -40;
-		JSONresponse.message = "signout fail";
-		// Insert checks for 404 NOT FOUND errors if you think they may occur
-		// In the end return JSON string as response
-		res.writeHead(200, {'Content-Type': 'text/plain'});
-		res.write(JSON.stringify(JSONresponse));
-		res.end();
-		//*/
-	}
+function queryDBSignup(username,email,password,secq1,secq2,seca1,seca2,res){
+	// Ask DB server (actual one) to create the usename. If it fails, it means the usename is already taken. send error to user
+	// else, compute the hash and salt and add this new tiplet to the auth esrver's use_hash_salt table
+	var jsonstring=JSON.stringify({username:username});
+	httprequester.post('http://'+conf.db_server_ip+":"+conf.db_server_port+"/?queryType=adduser",{body:jsonstring},function(error,response,body){
+		// request to DB server asking it to reserve a username
+		if(!error){
+			var jsondata=JSON.parse(body);
+			console.log("first requuest done");
+			var jsonsdata=JSON.parse(body);
+			if(jsondata.status == "false"){
+				// Username already taken
+				sendResponse(res,"-99","TODO. SOME ERROR");//TODO
+			}
+			else{
+				console.log("qdbs1 DB worked");
+				var crypto=require('crypto');
+				var salt = crypto.randomBytes(32).toString('hex'); // 64 chars = 256 bits
+				var hash=crypto.createHash('whirlpool').update(salt+password).digest('hex');
+				// add user credentials to the user_hash_salt table
+				// send this information to the DB
+				JSON.stringify({username:username,hash:hash,salt:salt});
+				httprequester.post(conf.backend_db+"/?queryType=adduserpass",{body:jsonstring},function(error,response,body){
+					// send the BE DB login credentials (username, hash, salt)
+					if(!error){
+						// username, hash, salt is now in DB
+						// add this information to the redis cache, Make it so that it expires in an hour TODO
+						redisclient.set(username,JSON.stringify([hash,salt]),function(){
+							redisclient.expire(username,3600,function(){
+								sendResponse(res,"0","Done");
+							});
+						});
+					}
+					else{
+						sendResponse(res,"-99","Could not insert computed Hash and Salt to Database");
+					}		
+				});
+			}	
+		}
+		else{
+			sendResponse(res,"-99","Server Internal Error: BE DB Did not respond");
+		}
+	});
+}
 
-	if(queryData.queryType == "signin")
-	{
-		console.log('This is a signin session');
-		console.log('Password: ' + queryData.password);
-		
-		///*
-		
-		// if fail
-		//JSONresponse.statusCode = -30;
-		//JSONresponse.message = "signin fail";
-		JSONresponse.message = generate_key(); 
-		// Insert checks for 404 NOT FOUND errors if you think they may occur
-		// In the end return JSON string as response
-		res.writeHead(200, {'Content-Type': 'text/plain'});
-		res.write(JSON.stringify(JSONresponse));
-		res.end();
-		//*/
-	}
+function queryDBSignin(username,password,res){
+	// check for hash/salt pair for given username in redis
+	// if they DNE, then check Backend DB
+	// TODO Inorder to support multiple devices per user we need to add separate token entries 
+	var crypto = require('crypto');
+	var jsonstring=JSON.stringify({username:username});
+	redisclient.get(username,function(err,reply){
+		// mock redis query step for hash/salt pair for username given
+		if(reply!=null){
+			// in redis. easy from herei
+			console.log("redis reply:"+reply);
+			var data = JSON.parse(reply);
+			var generatedHash = crypto.createHash('whirlpool').update(data[1]+password).digest('hex');
+			if(generatedHash==data[0]){
+				// passwords match
+				var buf = crypto.randomBytes(128);
+				var token = buf.toString('hex');
+				console.log('Aww Yiss: '+ token);
+				sendResponse(res,"0","Login Success");
+			}
+			else{
+				// passwords dont match
+				sendResponse(res,"-30","Username Password Mismatch");
+			}
+		}
+		else{
+			// not in redis, check DB
+			httprequester.post('http://'+conf.db_server_ip+":"+conf.db_server_port+"/?queryType=getuserinfo",{body:jsonstring},function(error,response,body){
+				// mock http request to BE DB for hash,salt par for given username
+				if(!error){
+					// found info. compute hash/salt and compare
+					var jsondata=JSON.parse(body);
+					if(jsondata.status == "true"){
+						salt = jsondata.salt;
+						hash = jsondata.hash;
+						console.log("h=>"+hash+"  s=>"+salt);
+						// var listofhash=require('crypto').getHashes();
+						var generatedHash = crypto.createHash('whirlpool').update(salt+password).digest('hex');
+						if(hash==generatedHash){
+							// successful login. generate token
+							try{
+								var buf = crypto.randomBytes(128);
+								var token = buf.toString('hex');
+								console.log('Aww Yiss: '+ token);
+								//add the token to the redis databsae
+								redisclient.set(username,JSON.stringify([hash,salt]),function(){
+									// auth good. added to redis so future request will be accepted
+									sendResponse(res,"0","Login Success");
+									// now time to add it to the BE database and set the expiration times
+									redisclient.expire(username,3600,function(){
+										// set expiration time for that entry for 1 hour???? TODO
+									});
+									jsonstring=JSON.stringify({username:username,token:token});
+									httprequester.post('http://'+conf.db_server_ip+":"+conf.db_server_port+"/?queryType=addusertoken",{body:jsonstring},function(error,response,body){
+										// set expiration tim efor the toke (persistant version) for 24 hours?
+									});
+								});
+							}
+							catch (ex){
+								// could not create salt.. maybe entropy sources drained. consider this as a sever internal isse. FE can lie to the user
+								sendResponse(res,"-99","Could not generate random string for token");
+							}
+						}
+						else{
+							sendResponse(res,"-30","Username Password Mismatch");
+						}
+					}
+					else{
+						sendResponse(res,"-30","User not in database");
+					}
+				}
+				else{
+					// username not in DB, invalid user
+					sendResponse(res,"-99","Internal Server Internal Error: BE DB Did not respond");
+				}
+			});
+		}
+	});
+}
 
-	if(queryData.queryType == "verification")
-	{
-		console.log('This is a verification session');
-		console.log('Secret Key: ' + queryData.secretkey);
-		///*
-		// if username doesn't exist
-		//JSONresponse.statusCode = -40;
-		//JSONresponse.message = "username doesn't exist";
-		
-		// if username/password mismatch
-		JSONresponse.statusCode = -41;
-		JSONresponse.message = "username password mismatch";
-		// Insert checks for 404 NOT FOUND errors if you think they may occur
-		// In the end return JSON string as response
-		res.writeHead(200, {'Content-Type': 'text/plain'});
-		res.write(JSON.stringify(JSONresponse));
-		res.end();
-		//*/
-=======
 
 function sendResponse(res, responseCode, responseString){
 	// end point of all requesti
 	// create a JSON like string with the above info and send it to user
 	res.writeHead(200, {'Content-Type': 'text/plain'});
 	//res.write('hashed:Sup bruh?\n');
-        res.end("{\"status\":\""+responseCode+"\",\"message\":"+responseString+"\"}");	
+        res.end("{\"status\":\""+responseCode+"\",\"message\":\""+responseString+"\"}");	
 }
 
-function parseConfigFile(filename){
-	// since config file readinf is in the initialization procedure, we do it synchronously
-	// synchronous and asynchronous fileIO : http://stackoverflow.com/questions/6831918/node-js-read-a-text-file-into-an-array-each-line-an-item-in-the-array
-	var fs = require('fs');
-	var conf = new Array();
-	var array = fs.readFileSync(filename).toString().split('\n');
-	for(i in array){
-		//console.log(array[i]);
-		var kv = array[i].split('=');
-		conf[kv[0]]=kv[1];
->>>>>>> 899350a5d335c6e751b6bd0283f46f65f86ced12
-	}
-	return conf;
+function parseConfig(){
+        var fs=require('fs');
+        var rawdata = fs.readFileSync("../config.txt").toString();
+        var conf = JSON.parse(rawdata);
+        return conf;
 }
-

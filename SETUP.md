@@ -4,14 +4,11 @@ This file contains all necessary steps followed to install/startup additional re
 
 REDIS: Source: http://redis.io/topics/quickstart
 	INSTALLATION:
-		wget http://download.redis.io/redis-stable.tar.gz
-		tar xvzf redis-stable.tar.gz
-		cd redis-stable
-		make	
-
+		sudo apt-get install redis-server
 	RUN:
-		./redis-server (if path not set,server executable is found in blahblah/redis-stable/src)
-	
+		redis-server (if path not set,server executable is found in blahblah/redis-stable/src)
+		redis-cli to open the client	
+		
 	WORTH MENTIONING:
 		#Redis by default runs without a config file. With out that we cant specify when to backup data
 		#To do this. We need to download a template and use it when starting redis
