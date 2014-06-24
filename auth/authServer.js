@@ -19,14 +19,14 @@ http.createServer(function (req, res) {
 	var queryData = url.parse(req.url, true).query;
 	console.log('Auth received a request: '+req.url);
 
-	if(queryData.querytype == 'verify'){
+	if(queryData.queryType == 'verify'){
 	}
-	else if(queryData.querytype == 'signin'){
+	else if(queryData.queryType == 'signin'){
 		queryDBSignin("defaultuser","defaultpassword",res);
 	}
-	else if(queryData.querytype == 'signout'){
+	else if(queryData.queryType == 'signout'){
         }
-        else if(queryData.querytype == 'signup'){
+        else if(queryData.queryType == 'signup'){
 		console.log("signup function calling");
 		queryDBSignup("unm1","eml1","pwd1","sec1","sec2","seca1","seca2",res);
         }

@@ -3,7 +3,6 @@ var sys = require("sys");
 var url = require("url");
 var path = require("path");  
 var util = require('util');
-var express = require('express');
 var querystring = require('querystring');
 var crypto = require('crypto');
 var redis = require("redis");
