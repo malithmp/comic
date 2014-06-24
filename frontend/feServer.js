@@ -327,7 +327,7 @@ function validateUsername(username, response)
 {
 	// Need regex to verify validity of username
 	// TODO Regex doesn't work
-    var regex = /^[a-z]*[a-z0-9_]*[a-z0-9]$/;
+    var regex = /^[a-z]+[a-z0-9_]*[a-z0-9]$/;
 	var match = username.match(regex);
 		
 	if(match)
@@ -365,7 +365,7 @@ function checkSignInParams(body, response, JSONresponse)
 	if(body.username)
 	{
 		console.log('Username: ' + body.username);
-		validateUsername(body.username);
+		validateUsername(body.username, response);
 	}
 	else
 	{
@@ -428,7 +428,7 @@ function checkSignUpParams(body, response)
 	if(body.username)
 	{
 		console.log('Username: ' + body.username);
-		validateUsername(body.username);
+		validateUsername(body.username,response);
 	}
 	else
 	{

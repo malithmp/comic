@@ -15,9 +15,9 @@ redisclient.on('error',function(err){
 // Load configuration parameters
 var conf = parseConfig();	
 
-http.createServer(function (req, res) {
-	var queryData = url.parse(req.url, true).query;
-	console.log('Auth received a request: '+req.url);
+http.createServer(function (request, response) {
+	var queryData = url.parse(request.url, true).query;
+	console.log('Auth received a request: '+request.url);
 	if(request.method=='POST'){
 		var body='';
 		request.on('data',function(data){
@@ -28,9 +28,9 @@ http.createServer(function (req, res) {
 			}
 		});
 		request.on('end',function(){
-			//var postdata = JSON.parse(body);
+			var postdata = JSON.parse(body);
 			//console.log('body-->'+postdata[0]+":"+postdata[1]);
-			directRequest(querydata.queryType,body,response);
+			directRequest(queryData.queryType,postdata,response);
 			//console.log('parsed -->'+postdata.key);
 		});
 	}
@@ -39,11 +39,14 @@ http.createServer(function (req, res) {
 console.log('auth Server running at http://'+conf.auth_server_ip+":"+conf.auth_server_port);
 
 
-function directRequest(command,rawdata,res){
+function directRequest(command,jsondata,res){
         if(command == 'verify'){
         }
         else if(command == 'signin'){
-                queryDBSignin("defaultuser","defaultpassword",res);
+                //queryDBSignin("defaultuser","defaultpassword",res);
+		console.log(jsondata.username+"----"+jsondata.password);
+		queryDBSignin(jsondata.username,jsondata.password,res);
+		//validateUsername(jsondata.username,jsondata.password,res);
         }
         else if(command == 'signout'){
         }
@@ -172,7 +175,7 @@ function queryDBSignin(username,password,res){
 				// passwords match
 				var buf = crypto.randomBytes(128);
 				var token = buf.toString('hex');
-				console.log('Aww Yiss: '+ token);
+				//console.log('Aww Yiss: '+ token);
 				sendResponse(res,"0","Login Success");
 			}
 			else{
@@ -219,6 +222,7 @@ function queryDBSignin(username,password,res){
 							}
 						}
 						else{
+							console.log("Password mismatch");
 							sendResponse(res,"-30","Username Password Mismatch");
 						}
 					}
@@ -241,7 +245,7 @@ function sendResponse(res, responseCode, responseString){
 	// create a JSON like string with the above info and send it to user
 	res.writeHead(200, {'Content-Type': 'text/plain'});
 	//res.write('hashed:Sup bruh?\n');
-        res.end("{\"status\":\""+responseCode+"\",\"message\":\""+responseString+"\"}");	
+        res.end("{\"statusCode\":\""+responseCode+"\",\"message\":\""+responseString+"\"}");	
 }
 
 function parseConfig(){
