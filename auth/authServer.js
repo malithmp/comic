@@ -49,10 +49,11 @@ function directRequest(command,jsondata,res){
 		//validateUsername(jsondata.username,jsondata.password,res);
         }
         else if(command == 'signout'){
+		queryDBsignout(jsondata.username,res);
         }
         else if(command == 'signup'){
                 console.log("signup function calling");
-                queryDBSignup("unm1","eml1","pwd1","sec1","sec2","seca1","seca2",res);
+                queryDBSignup(jsondata.username,jsondata.email,jsondata.password,"sec1","sec2","seca1","seca2",res);
         }
         else if(command == 'getToken'){
                 queryDBgetToken("username",res);
@@ -66,17 +67,18 @@ function directRequest(command,jsondata,res){
         //res.end('K THX BYE\n');
 }
 
-function queryDBsignout(){
+function queryDBsignout(username,res){
 	// remove the token from the BE server if it exists.
 	// Nothing much this is literally the easist part for the auth server
-	httprequester.post('http://'+conf.db_server_ip+":"+conf.db_server_port+"/?queryType=getusertoken",{body:jsonstring},function(error,response,body){
+	var jsonstring=JSON.stringify({username:username});
+	httprequester.post('http://'+conf.db_server_ip+":"+conf.db_server_port+"/?queryType=removeusertoken",{body:jsonstring},function(error,response,body){
 		if(!error){
 			var jsondata=JSON.parse(body);
 			if(jsondata.status=="true"){
-				sendresponse(res,"0","Done");
+				sendResponse(res,"0","Done");
 			}
 			else{
-				sendresponse(res,"-20","Something went wrong and I dont know what!");
+				sendResponse(res,"-20","Something went wrong and I dont know what!");
 			}
 		}
 		else{
@@ -135,11 +137,12 @@ function queryDBSignup(username,email,password,secq1,secq2,seca1,seca2,res){
 				// add user credentials to the user_hash_salt table
 				// send this information to the DB
 				JSON.stringify({username:username,hash:hash,salt:salt});
-				httprequester.post(conf.backend_db+"/?queryType=adduserpass",{body:jsonstring},function(error,response,body){
+				httprequester.post('http://'+conf.db_server_ip+":"+conf.db_server_port+"/?queryType=adduserpass",{body:jsonstring},function(error,response,body){
 					// send the BE DB login credentials (username, hash, salt)
 					if(!error){
 						// username, hash, salt is now in DB
 						// add this information to the redis cache, Make it so that it expires in an hour TODO
+						console.log(body);
 						redisclient.set(username,JSON.stringify([hash,salt]),function(){
 							redisclient.expire(username,3600,function(){
 								sendResponse(res,"0","Done");
@@ -147,6 +150,7 @@ function queryDBSignup(username,email,password,secq1,secq2,seca1,seca2,res){
 						});
 					}
 					else{
+						console.log(error);
 						sendResponse(res,"-99","Could not insert computed Hash and Salt to Database");
 					}		
 				});
@@ -176,7 +180,7 @@ function queryDBSignin(username,password,res){
 				var buf = crypto.randomBytes(128);
 				var token = buf.toString('hex');
 				//console.log('Aww Yiss: '+ token);
-				sendResponse(res,"0","Login Success");
+				sendResponse(res,"0",token);
 			}
 			else{
 				// passwords dont match
