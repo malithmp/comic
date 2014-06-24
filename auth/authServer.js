@@ -18,30 +18,71 @@ var conf = parseConfig();
 http.createServer(function (req, res) {
 	var queryData = url.parse(req.url, true).query;
 	console.log('Auth received a request: '+req.url);
-
-	if(queryData.queryType == 'verify'){
+	if(request.method=='POST'){
+		var body='';
+		request.on('data',function(data){
+			body+=data;
+			// prevent from attacks (by terminating long messages)
+			if(body.length > 10000){// we will never use more than 10k letters
+				request.connections.destroy();
+			}
+		});
+		request.on('end',function(){
+			//var postdata = JSON.parse(body);
+			//console.log('body-->'+postdata[0]+":"+postdata[1]);
+			directRequest(querydata.queryType,body,response);
+			//console.log('parsed -->'+postdata.key);
+		});
 	}
-	else if(queryData.queryType == 'signin'){
-		queryDBSignin("defaultuser","defaultpassword",res);
-	}
-	else if(queryData.queryType == 'signout'){
-        }
-        else if(queryData.queryType == 'signup'){
-		console.log("signup function calling");
-		queryDBSignup("unm1","eml1","pwd1","sec1","sec2","seca1","seca2",res);
-        }
-	else{
-		//ignore
-		sendResponse(res,"-99","Invalid Protocol request to auth");
-	}
-	//res.writeHead(200, {'Content-Type': 'text/plain'});
-	//res.write('hashed:Sup bruh?\n');
-	//res.end('K THX BYE\n');
 	
 }).listen(conf.auth_server_port,conf.auth_port_ip);
 console.log('auth Server running at http://'+conf.auth_server_ip+":"+conf.auth_server_port);
 
-function queryDBgetToken(username){
+
+function directRequest(command,rawdata,res){
+        if(command == 'verify'){
+        }
+        else if(command == 'signin'){
+                queryDBSignin("defaultuser","defaultpassword",res);
+        }
+        else if(command == 'signout'){
+        }
+        else if(command == 'signup'){
+                console.log("signup function calling");
+                queryDBSignup("unm1","eml1","pwd1","sec1","sec2","seca1","seca2",res);
+        }
+        else if(command == 'getToken'){
+                queryDBgetToken("username",res);
+        }
+        else{
+                //ignore
+                sendResponse(res,"-99","Invalid Protocol request to auth");
+        }
+        //res.writeHead(200, {'Content-Type': 'text/plain'});
+        //res.write('hashed:Sup bruh?\n');
+        //res.end('K THX BYE\n');
+}
+
+function queryDBsignout(){
+	// remove the token from the BE server if it exists.
+	// Nothing much this is literally the easist part for the auth server
+	httprequester.post('http://'+conf.db_server_ip+":"+conf.db_server_port+"/?queryType=getusertoken",{body:jsonstring},function(error,response,body){
+		if(!error){
+			var jsondata=JSON.parse(body);
+			if(jsondata.status=="true"){
+				sendresponse(res,"0","Done");
+			}
+			else{
+				sendresponse(res,"-20","Something went wrong and I dont know what!");
+			}
+		}
+		else{
+			sendResponse(res,"-99","Server Internal Error: BE DB Did not respond. Could not get the token");
+		}
+	});
+}
+
+function queryDBgetToken(username,res){
 	//relay the message to the database. auth server does nothing here
 	httprequester.post('http://'+conf.db_server_ip+":"+conf.db_server_port+"/?queryType=getusertoken",{body:jsonstring},function(error,response,body){
 		if(!error){

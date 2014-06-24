@@ -2,7 +2,7 @@
 	"auth_server_ip"		:	"192.168.0.150",
 	"auth_server_port"		:	"1338",
 	"db_server_ip"			:	"192.168.0.150",
-	"db_server_port"		:	"8000",
+	"db_server_port"		:	"1340",
 	"db_server_token_expiry"	:	"86400",
 	"mysql_host"			:	"localhost",
 	"mysql_username"		:	"root",

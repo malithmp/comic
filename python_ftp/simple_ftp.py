@@ -20,7 +20,7 @@ def main():
 
 def notMain():
 	try:
-		server = HTTPServer(('',8080), MyHandler)
+		server = HTTPServer(('192.168.0.150',8081), MyHandler)
 		print ('started')
 		server.serve_forever()
 	except KeyboardInterrupt:

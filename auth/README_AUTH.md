@@ -1,4 +1,7 @@
 Purpose: This component is responsible for authenticating users
+	On a very high level, the auth server provide controlled access to the user login data in the BE Databse. It does not have any persistant data
+	It is just there for the sake of having the code base organized and to leave space for future expansions
+
 	- Contains functionality needed for user authentication
 		- Password matching using hash and salt method
 		- Token creation for sessions

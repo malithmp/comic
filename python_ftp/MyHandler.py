@@ -1,5 +1,5 @@
 from http.server import BaseHTTPRequestHandler
-import os, os.path, tempfile
+import os, os.path,binascii 
 from glbl import *
 import cgi
 from time import time
@@ -25,9 +25,12 @@ def parsePost(postData):
 			outputDict[key]=value
 		return outputDict
 
-def expectFile(filename):
-	pushExpectingID(filename)
-	
+def expectFile():
+	randomfilename=binascii.b2a_hex(os.urandom(64)).decode('utf-8')
+	while(not pushExpectingID(randomfilename)):
+		randomfilename=binascii.b2a_hex(os.urandom(64))
+	return randomfilename
+
 class MyHandler(BaseHTTPRequestHandler):
 	
 	def do_GET(self):
@@ -70,10 +73,11 @@ class MyHandler(BaseHTTPRequestHandler):
 				# expecting only text.
 				post_body = self.rfile.read(content_len)
 				data = parsePost(post_body.decode("utf-8"))
-
 				if(data['command'] == 'expect'):	
-					expectFile(data['filename'])
-
+					fname=expectFile()
+					responseString='\"status\":\"true\",\"filename\":'+fname+'\"'
+					self.send_header('Content-type','text/html')
+					self.wfile.write(responseString.encode('utf-8'))
 				elif(data['command'] == 'setfile'):
 					# this is not supported with this content type
 					print('Unsupported')
@@ -88,10 +92,12 @@ class MyHandler(BaseHTTPRequestHandler):
 				command = cmd.decode('utf-8')
 
 				if(command == 'expect'):
-					fname = p.get('filename').file.read()
-					filename = fname.decode('utf-8')
-					expectFile(filename)
-
+					fname=expectFile()
+					self.send_header('Content-type','text/html')
+					self.end_headers()
+					responseString = "\"status\":\"true\",\"filename\":"+fname+"\""
+					self.wfile.write("tits".encode('utf-8'))
+					print(':(')
 				elif(command == 'setfile'):
 					# get file from user.. check if the server is expecting this file. if so save it. else reject
 					fname = p.get('filename').file.read()

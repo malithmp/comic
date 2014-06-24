@@ -54,6 +54,9 @@ function directRequest(command, rawdata,res){
 		console.log("TODO, stub add usertoken function invoked");
 		addusertoken(data.username,data.token,res);
         }
+	else if(command == "removeusertoken"){
+                removeusertoken(data.username,res);
+        }
 	else if(command == "getusertoken"){
 		// we need to check if the token is not expired, if not extend expiration time
                 console.log("TODO, stub getusertoken function invoked");
@@ -78,6 +81,22 @@ function getuserinfo(username,res){
         sendResponse(res,responseSet);
 }
 
+
+function removeusertoken(username,res){
+	// remove the token for that user if it exists. If the token does not exists bofere deletion, err
+	var responseSet={"status":"true"};
+	var queryString = "delete from user_tokens where username=\""+username+"\";";
+	console.log("got:"+username);
+	mysqlconnection.query(queryString,function(err,rows){
+		if(err){
+			responseSet={"status":"fail","message":"It just failed!"};
+			sendResponse(res,responseSet);
+		}
+		else{
+			sendResponse(res,responseSet);
+		}
+	});	
+}
 
 function addusertoken(username, token, res){
         console.log("got:"+username+" and "+token);
