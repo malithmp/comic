@@ -263,7 +263,7 @@ http.createServer(function (req, res) {
 	   						if(chunk.statusCode == 0)
 	   						{
 	   							console.log('signout successful');
-	   							// TODO Remove the session id from redis (Not tested yet)
+	   							// TODO Remove the session id from redis
 	                            redisClient.del(feServerChunk.username, function(error, result) {
 	                                if (error) console.log('Error: '+ error);
 	                                else console.log('username:' + feServerChunk.username + ', signinToken: ' + result);
@@ -460,15 +460,8 @@ function checkSignUpParams(body, response)
 // Only call this this when it is NOT a sign in session, but one that is likely to sustain
 function checkToken(body, response, redisClient, JSONresponse, callback)
 {
-	console.log('In checktoken, initial body signinToken is:', body.signinToken);
-	console.log('Initial value of JSONresponse');
-	console.log('-------------------');
-	console.log(JSONresponse.statusCode); 
-	console.log(JSONresponse.message);
-	console.log('-------------------');
 	if(body.signinToken == 0)
 	{	
-		console.log('Body signinToken is:', body.signinToken);
 		JSONresponse.statusCode = -50;
 		JSONresponse.message = "invalid signinToken: Cannot have signinToken 0 for this queryType";
 		writeResponse(response, 200, JSONresponse);
@@ -483,6 +476,7 @@ function checkToken(body, response, redisClient, JSONresponse, callback)
 				console.log('Error: '+ error);
 				console.log('Token not found in Redis, will look at authServer');				
 				// TODO We might have to go check MySQL here instead of directly reporting error
+				// TODO we might have to introduce some callback mechanism here too
 				return getTokenFromAuth(body.username, body.signinToken, redisClient);
             }
             else 
@@ -500,13 +494,7 @@ function checkToken(body, response, redisClient, JSONresponse, callback)
 
                 });
                 // and allow to proceed
-                console.log('Result is', result);
-				console.log('-------------------');
-				console.log(JSONresponse.statusCode); 
-				console.log(JSONresponse.message);
-				console.log('-------------------');
                	callback(null, result);
-               	//return result;
             }
         });
 	}
