@@ -1,0 +1,261 @@
+{
+  "signup-basic-1": {
+    "1": {
+      "queryType":"signup",
+      "username": "user1",
+      "password": "pass1",
+      "email": "email1@shemail.com"
+    },
+    "description":"Basic Signup",
+    "steps": "1"
+  },
+  "signup-basic-2": {
+    "1": {
+      "queryType":"signup",
+      "username": "user2",
+      "password": "pass2",
+      "email": "email2@shemail.com"
+    },
+    "description":"Basic Signup",
+    "steps": "1"
+  },
+  "signup-basic-3": {
+    "1": {
+      "queryType":"signup",
+      "username": "user3",
+      "password": "pass3",
+      "email": "email3@shemail.com"
+    },
+    "description":"Basic Signup",
+    "steps": "1"
+  },
+  "signup-bad-username-1": {
+    "1": {
+      "queryType":"signup",
+      "username": "userName1",
+      "password": "pass3",
+      "email": "email3@shemail.com"
+    },
+    "description":"Username that does not match the regex",
+    "steps": "1"
+  },
+  "signup-bad-username-2": {
+    "1": {
+      "queryType":"signup",
+      "username": "1user",
+      "password": "pass3",
+      "email": "email3@shemail.com"
+    },
+    "description":"Username that does not match the regex",
+    "steps": "1"
+  },
+  "signup-bad-email-1": {
+    "1": {
+      "queryType":"signup",
+      "username": "1user",
+      "password": "pass3",
+      "email": "email3atshemail.com"
+    },
+    "description":"Email address that does not adhere to format",
+    "steps": "1"
+  },
+  "signup-bad-email-2": {
+    "1": {
+      "queryType":"signup",
+      "username": "1user",
+      "password": "pass3",
+      "email": "email3@shemail"
+    },
+    "description":"Email address that does not adhere to format",
+    "steps": "1"
+  },
+  
+  "signup-duplicate-username-1": {
+    "1": {
+      "queryType":"signup",
+      "username": "user1",
+      "password": "pass1",
+      "email": "email1@shemail"
+    },
+    "2": {
+      "queryType":"signup",
+      "username": "user1",
+      "password": "pass2",
+      "email": "email2@shemail"
+    },
+    "description":"Attemted signup to already taken username",
+    "steps": "2"
+  },
+
+  "signup-duplicate-email-1": {
+    "1": {
+      "queryType":"signup",
+      "username": "user1",
+      "password": "pass1",
+      "email": "email1@shemail"
+    },
+    "2": {
+      "queryType":"signup",
+      "username": "user2",
+      "password": "pass2",
+      "email": "email1@shemail"
+    },
+    "description":"Attempted signup to already take email address",
+    "steps": "2"
+  },
+  
+  "signin-basic-1": {
+    "1": {
+      "queryType":"signup",
+      "username": "user1",
+      "password": "pass1",
+      "email": "email1@shemail.com"
+    },
+    "2": {
+      "queryType":"signin",
+      "username": "user1",
+      "password": "pass1"
+    },
+    "description":"Singup and then signin",
+    "steps": "2"
+  },
+  
+  "signin-basic-2": {
+    "1": {
+      "queryType":"signup",
+      "username": "user2",
+      "password": "pass2",
+      "email": "email2@shemail.com"
+    },
+    "2": {
+      "queryType":"signin",
+      "username": "user2",
+      "password": "pass2"
+    },
+    "description":"Signup and then signin",
+    "steps": "2"
+  },
+  "signin-nouser-1": {
+    "1": {
+      "queryType":"signup",
+      "username": "user1",
+      "password": "pass1",
+      "email": "email1@shemail.com"
+    },
+    "2": {
+      "queryType":"signin",
+      "username": "waldo",
+      "password": "pass2"
+    },
+    "description":"Attept to signin to a username that does not exist",
+    "steps": "2"
+  },
+  
+  "signin-wrongpass-1": {
+    "1": {
+      "queryType":"signup",
+      "username": "user1",
+      "password": "pass1",
+      "email": "email1@shemail.com"
+    },
+    "2": {
+      "queryType":"signin",
+      "username": "user1",
+      "password": "pass2"
+    },
+    "description":"Signin with incorrect password",
+    "steps": "2"
+  },
+  
+  "signin-wrongtoken-1": {
+    "1": {
+      "queryType":"signup",
+      "username": "user2",
+      "password": "pass2",
+      "email": "email2@shemail.com"
+    },
+    "2": {
+      "queryType":"signin",
+      "username": "user2",
+      "password": "pass2"
+    },
+    "description":"Try to signin with a token which is not 0 (the default signin token)",
+    "steps": "2"
+  },
+  
+  "signout-basic-1": {
+    "1": {
+      "queryType":"signup",
+      "username": "user1",
+      "password": "pass1",
+      "email": "email1@shemail.com"
+    },
+    "2": {
+      "queryType":"signin",
+      "username": "user1",
+      "password": "pass1"
+    },    
+    "3": {
+      "queryType":"signout",
+      "username": "user1"
+    },
+    "description":"Signup, signin and then signout",
+    "steps": "3"
+  },
+  
+  "signout-basic-2": {
+    "1": {
+      "queryType":"signup",
+      "username": "user2",
+      "password": "pass2",
+      "email": "email2@shemail.com"
+    },
+    "2": {
+      "queryType":"signin",
+      "username": "user2",
+      "password": "pass2"
+    },    
+    "3": {
+      "queryType":"signout",
+      "username": "user2"
+    },
+    "description":"Signup, sighnin and then signout",
+    "steps": "3"
+  },
+  
+  "signout-doublesignout-1": {
+    "1": {
+      "queryType":"signup",
+      "username": "user1",
+      "password": "pass1",
+      "email": "email1@shemail.com"
+    },
+    "2": {
+      "queryType":"signin",
+      "username": "user1",
+      "password": "pass1"
+    },    
+    "3": {
+      "queryType":"signout",
+      "username": "user1"
+    },
+    "4": {
+      "queryType":"signout",
+      "username": "user1"
+    },
+    "description":"Attemp to signout twice using the same token",
+    "steps": "4"
+  },
+  
+  "large-post-1": {
+    "1": {
+      "queryType":"signup",
+      "username": "user1",
+      "password": "pass1",
+      "email": "email1@shemail.com"
+    },
+    "description":"Huge http post body",
+    "steps": "1"
+  }
+  
+}
