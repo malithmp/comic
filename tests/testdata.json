@@ -1,0 +1,97 @@
+{
+  "good":{
+    "1":{
+      "desc":"good",
+      "username": "user1",
+      "password": "pass1",
+       "email": "email1@shemail.com"
+    },
+    "2":{
+      "desc":"good",
+      "username": "user2",
+      "password": "pass2",
+      "email": "email2@shemail.com"
+    },
+    "3":{
+      "desc":"good",
+      "username": "user3",
+      "password": "pass3",
+      "email": "email1@shemail.com"
+    },
+    "4":{
+      "desc":"good",
+      "username": "user4",
+      "password": "pass4",
+      "email": "email1@shemail.com"
+    }
+  },
+  
+  "bad-username":{
+    "1":{
+      "desc":"starts with character",
+      "username": "1user",
+      "password": "pass1",
+      "email": "email1@shemail.com"
+    },
+    "2":{
+      "desc":"uppercase character",
+      "username": "User2",
+      "password": "pass2",
+      "email": "email2@shemail.com"
+    },
+    "3":{
+      "desc":"special character",
+      "username": "use(r3",
+      "password": "pass3",
+      "email": "email1@shemail.com"
+    },
+    "4":{
+      "desc":"empty usernmae",
+      "username": "",
+      "password": "pass4",
+      "email": "email1@shemail.com"
+    }
+  },
+  
+  "bad-password":{
+    "1":{
+      "desc":"same as username",
+      "username": "user1",
+      "password": "user1",
+      "email": "email1@shemail.com"
+    },
+    "2":{
+      "desc":"no password",
+      "username": "user2",
+      "password": "",
+      "email": "email2@shemail.com"
+    },
+    "3":{
+      "desc":"too short",
+      "username": "user3",
+      "password": "3",
+      "email": "email1@shemail.com"
+    }
+  },
+  
+  "bad-email":{
+    "1":{
+      "desc":"no @ sign",
+      "username": "user1",
+      "password": "pass1",
+       "email": "email1atshemail.com"
+    },
+    "2":{
+      "desc":" '.' missing",
+      "username": "user2",
+      "password": "pass2",
+      "email": "email2@shemailcom"
+    },
+    "3":{
+      "desc":"case sensitive: email addresses should not be case sensitive and we should ignore the case",
+      "username": "user3",
+      "password": "pass3",
+      "email": "Email1@sheMail.com"
+    }
+  }
+}
