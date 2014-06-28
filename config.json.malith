@@ -1,32 +1,33 @@
 {
-  "Servers":{
+  "servers":{
     "feServer":{
-      "host":"localhost",
+      "host":"192.168.0.150",
       "port":1337
     },
     
     "authServer":{
-      "host":"localhost",
-      "port":1338
+      "host":"192.168.0.150",
+      "port":1338,
+      "redisDB":1
     },
     
     "notifServer":{
-      "host":"localhost",
+      "host":"192.168.0.150",
       "port":1339
     },
     
     "dbServer":{
-      "host":"localhost",
+      "host":"192.168.0.150",
       "port":1340,
-      "token_expiry":86400,
-      "mysql_host":"localhost",
-      "mysql_username":"root",
-      "mysql_password":"comic",
-      "mysql_database":"comic"
+      "tokenExpiry":86400,
+      "mysqlHost":"192.168.0.150",
+      "mysqlUsername":"root",
+      "mysqlPassword":"comic",
+      "mysqlDatabase":"comic"
     },
     
     "FTPServer":{
-      "host":"localhost",
+      "host":"192.168.0.150",
       "port":1341
     }
   }

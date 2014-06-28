@@ -7,13 +7,13 @@ var util = require('util');
 var redis = require('redis');
 var redisclient = redis.createClient();
 
-redisclient.select(2);
+// Load configuration parameters
+var conf = parseConfig();
+
+redisclient.select(conf.servers.authServer.redisDB);
 redisclient.on('error',function(err){
 	console.log('Redis Error:'+err);
 });
-
-// Load configuration parameters
-var conf = parseConfig();	
 
 http.createServer(function (request, response) {
 	var queryData = url.parse(request.url, true).query;
@@ -35,8 +35,8 @@ http.createServer(function (request, response) {
 		});
 	}
 	
-}).listen(conf.auth_server_port,conf.auth_port_ip);
-console.log('auth Server running at http://'+conf.auth_server_ip+":"+conf.auth_server_port);
+}).listen(conf.servers.authServer.port,conf.servers.authServer.host);
+console.log('auth Server running at http://'+conf.servers.authServer.host+":"+conf.servers.authServer.port);
 
 
 function directRequest(command,jsondata,res){
@@ -71,7 +71,7 @@ function queryDBsignout(username,res){
 	// remove the token from the BE server if it exists.
 	// Nothing much this is literally the easist part for the auth server
 	var jsonstring=JSON.stringify({username:username});
-	httprequester.post('http://'+conf.db_server_ip+":"+conf.db_server_port+"/?queryType=removeusertoken",{body:jsonstring},function(error,response,body){
+	httprequester.post('http://'+conf.servers.dbServer.host+":"+conf.servers.dbServer.port+"/?queryType=removeusertoken",{body:jsonstring},function(error,response,body){
 		if(!error){
 			var jsondata=JSON.parse(body);
 			if(jsondata.status=="true"){
@@ -89,7 +89,7 @@ function queryDBsignout(username,res){
 
 function queryDBgetToken(username,res){
 	//relay the message to the database. auth server does nothing here
-	httprequester.post('http://'+conf.db_server_ip+":"+conf.db_server_port+"/?queryType=getusertoken",{body:jsonstring},function(error,response,body){
+	httprequester.post('http://'+conf.servers.dbServer.host+":"+conf.servers.dbServer.port+"/?queryType=getusertoken",{body:jsonstring},function(error,response,body){
 		if(!error){
 			var jsondata=JSON.parse(body);
 			if(jsondata.status=="true"){
@@ -119,7 +119,7 @@ function queryDBSignup(username,email,password,secq1,secq2,seca1,seca2,res){
 	// Ask DB server (actual one) to create the usename. If it fails, it means the usename is already taken. send error to user
 	// else, compute the hash and salt and add this new tiplet to the auth esrver's use_hash_salt table
 	var jsonstring=JSON.stringify({username:username});
-	httprequester.post('http://'+conf.db_server_ip+":"+conf.db_server_port+"/?queryType=adduser",{body:jsonstring},function(error,response,body){
+	httprequester.post('http://'+conf.servers.dbServer.host+":"+conf.servers.dbServer.port+"/?queryType=adduser",{body:jsonstring},function(error,response,body){
 		// request to DB server asking it to reserve a username
 		if(!error){
 			var jsondata=JSON.parse(body);
@@ -137,7 +137,7 @@ function queryDBSignup(username,email,password,secq1,secq2,seca1,seca2,res){
 				// add user credentials to the user_hash_salt table
 				// send this information to the DB
 				JSON.stringify({username:username,hash:hash,salt:salt});
-				httprequester.post('http://'+conf.db_server_ip+":"+conf.db_server_port+"/?queryType=adduserpass",{body:jsonstring},function(error,response,body){
+				httprequester.post('http://'+conf.servers.dbServer.host+":"+conf.servers.dbServer.port+"/?queryType=adduserpass",{body:jsonstring},function(error,response,body){
 					// send the BE DB login credentials (username, hash, salt)
 					if(!error){
 						// username, hash, salt is now in DB
@@ -189,7 +189,7 @@ function queryDBSignin(username,password,res){
 		}
 		else{
 			// not in redis, check DB
-			httprequester.post('http://'+conf.db_server_ip+":"+conf.db_server_port+"/?queryType=getuserinfo",{body:jsonstring},function(error,response,body){
+			httprequester.post('http://'+conf.servers.dbServer.host+":"+conf.servers.dbServer.port+"/?queryType=getuserinfo",{body:jsonstring},function(error,response,body){
 				// mock http request to BE DB for hash,salt par for given username
 				if(!error){
 					// found info. compute hash/salt and compare
@@ -215,7 +215,7 @@ function queryDBSignin(username,password,res){
 										// set expiration time for that entry for 1 hour???? TODO
 									});
 									jsonstring=JSON.stringify({username:username,token:token});
-									httprequester.post('http://'+conf.db_server_ip+":"+conf.db_server_port+"/?queryType=addusertoken",{body:jsonstring},function(error,response,body){
+									httprequester.post('http://'+conf.servers.dbServer.host+":"+conf.servers.dbServer.port+"/?queryType=addusertoken",{body:jsonstring},function(error,response,body){
 										// set expiration tim efor the toke (persistant version) for 24 hours?
 									});
 								});
@@ -254,7 +254,7 @@ function sendResponse(res, responseCode, responseString){
 
 function parseConfig(){
         var fs=require('fs');
-        var rawdata = fs.readFileSync("../config.txt").toString();
+        var rawdata = fs.readFileSync("../config.json").toString();
         var conf = JSON.parse(rawdata);
         return conf;
 }

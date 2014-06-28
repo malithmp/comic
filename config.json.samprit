@@ -1,5 +1,5 @@
 {
-  "Servers":{
+  "servers":{
     "feServer":{
       "host":"localhost",
       "port":1337
@@ -7,7 +7,8 @@
     
     "authServer":{
       "host":"localhost",
-      "port":1338
+      "port":1338,
+      "redisDB":1
     },
     
     "notifServer":{
@@ -18,11 +19,11 @@
     "dbServer":{
       "host":"localhost",
       "port":1340,
-      "token_expiry":86400,
-      "mysql_host":"localhost",
-      "mysql_username":"root",
-      "mysql_password":"comic",
-      "mysql_database":"comic"
+      "tokenExpiry":86400,
+      "mysqlHost":"localhost",
+      "mysqlUsername":"root",
+      "mysqlPassword":"comic",
+      "mysqlDatabase":"comic"
     },
     
     "FTPServer":{

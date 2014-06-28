@@ -7,7 +7,7 @@ var date=new Date();
 
 
 var conf=parseConfig();
-var mysqlconnection = mysql.createConnection({host:conf.mysql_host,user:conf.mysql_username,password:conf.mysql_password,database:conf.mysql_database});
+var mysqlconnection = mysql.createConnection({host:conf.servers.dbServer.mysqlHost,user:conf.servers.dbServer.mysqlUsername,password:conf.servers.dbServer.mysqlPassword,database:conf.servers.dbServer.mysqlDatabase});
 mysqlconnection.connect();
 
 var server = http.createServer(function (request, response) {
@@ -30,10 +30,10 @@ var server = http.createServer(function (request, response) {
 			//console.log('parsed -->'+postdata.key);
 		});
 	}
-}).listen(conf.db_server_port,conf.db_server_ip);
+}).listen(conf.servers.dbServer.port,conf.servers.dbServer.host);
 
 // Put a friendly message on the terminal
-console.log("Server running at http://"+conf.db_server_ip+":"+conf.db_server_port);
+console.log("Server running at http://"+conf.servers.dbServer.host+":"+conf.servers.dbServer.port);
 
 
 function directRequest(command, rawdata,res){
@@ -128,7 +128,7 @@ function getusertoken(username,res){
 				if(time<rows[0].expiry){
 					// token is not expired yet, we will return it and then update the new time
 					console.log(time);
-					time= parseInt(time)+parseInt(conf.db_server_token_expiry);
+					time= parseInt(time)+parseInt(conf.servers.dbServer.tokenExpiry);
 					console.log(time);
 					// send the user the reponse, adnt hen ipdate the time
 					responseSet={"status":"true","token":rows[0].token};
@@ -207,7 +207,7 @@ function sendResponse(res, responseSet){
 
 function parseConfig(){
 	var fs=require('fs');
-	var rawdata = fs.readFileSync("../config.txt").toString();
+	var rawdata = fs.readFileSync("../config.json").toString();
 	var conf = JSON.parse(rawdata);
 	return conf;
 }
