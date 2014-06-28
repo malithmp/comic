@@ -1,9 +1,10 @@
 emailSender is a node HTTP server which accepts only one type of request:
 
 queryType{
-  sndEmail{
+  sendEmail{
     email: <valid email>
     secretKey: <valid secretKey>
+    
     RESPONSE:
       statusCode: int
       message: string ("Success" or appropriate error message)
@@ -18,7 +19,7 @@ Example HTTP request:
 
 URL:
 
-ttp://127.0.0.1:1342/?queryType=sendEmail
+http://localhost:1342/?queryType=sendEmail
 
 HTTP Body:
 {
