@@ -1,0 +1,33 @@
+{
+  "Servers":{
+    "feServer":{
+      "host":"localhost",
+      "port":1337
+    },
+    
+    "authServer":{
+      "host":"localhost",
+      "port":1338
+    },
+    
+    "notifServer":{
+      "host":"localhost",
+      "port":1339
+    },
+    
+    "dbServer":{
+      "host":"localhost",
+      "port":1340,
+      "token_expiry":86400,
+      "mysql_host":"localhost",
+      "mysql_username":"root",
+      "mysql_password":"comic",
+      "mysql_database":"comic"
+    },
+    
+    "FTPServer":{
+      "host":"localhost",
+      "port":1341
+    }
+  }
+}
