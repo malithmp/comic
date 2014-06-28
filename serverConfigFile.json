@@ -23,6 +23,11 @@
     "simpleFTPServer": {
       "host": "localhost",
       "port": 1341
+    },
+
+    "emailSender": {
+      "host": "localhost",
+      "port": 1342
     }
   }
 }
