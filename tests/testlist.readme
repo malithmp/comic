@@ -1,0 +1,97 @@
+Data required for tests are in testdata.json
+All data is cleared from all components before each test
+
+- sequential
+= parallel
+
+Test List:
+	A1) signup basic
+		- signup good 1
+		- signup good 2
+
+	A2) signup multiple parallel with correct input
+		= signup good 1
+		= signup good 2
+		= signup good 3
+		= signup good 4
+
+	A3) signup multiple parallel same username more than once
+		= signup good 1
+		= signup good 2
+		= signup good 2
+		= signup good 2
+		= signup good 1
+
+	A4) signup basic incorrect username
+		- signup bad-username 1
+		- signup bad-username 2
+		- signup bad-username 3
+		- signup bad-username 4
+
+	A5) signup basic incorrect password
+		- signup bad-password 1
+		- signup bad-password 2
+		- signup bad-password 3
+		
+	A6) signup basic incorrect email
+                - signup bad-email 1
+                - signup bad-email 2
+                - signup bad-email 3
+
+	A7) signup basic bad token
+		- signup good 1
+
+	B1) signin basic
+		- signup good 1
+		- signin good 1
+
+	B2) signin parallel multiple user
+		- signup good 1
+                - signup good 2
+                - signup good 3
+                - signup good 4
+                = signin good 1
+                = signin good 2
+                = signin good 3
+                = signin good 4
+
+	B3) singin non-existing user
+		- signup good 1
+		- signin good 2 (Note: not added yet)
+
+	B4)  signin bad token
+		- signup good 1
+		- signin good 1 with bad token
+
+	B99) //TODO: signin in while registering
+
+	C1) signout basic
+		- signup good 1
+		- signin good 1
+		- signout good 1
+
+	C2) singout parallel
+		- signup good 1
+                - signin good 2
+                - signin good 3
+                - signin good 4
+                = singout good 1
+                = singout good 2
+                = singout good 3
+                = singout good 4
+
+	C3) signout bad token
+                - signup good 1
+                - signin good 2
+		- signin good 1
+                - signin good 2
+                - singout good 1 (bad token)
+                - singout good 2
+
+	C4) signout double attempt
+                - signup good 1
+                - signin good 1
+                - signout good 1
+                - signout good 1
+
+
