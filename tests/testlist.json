@@ -19,9 +19,9 @@
 		["signup","good","1","True"]
 	],
 	"A4":[
-		["signup","bad","1","False"],
-		["signup","bad","2","False"],
-		["signup","bad","3","False"],
-		["signup","bad","4","False"]
+		["signup","bad-username","1","False"],
+		["signup","bad-username","2","False"],
+		["signup","bad-username","3","False"],
+		["signup","bad-username","4","False"]
 	]
 }
