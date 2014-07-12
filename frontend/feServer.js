@@ -66,6 +66,26 @@ http.createServer(function (req, res) {
 	   						if(chunk.statusCode == 0)
 	   						{
 	   							console.log('signup successful');
+	   							// We will receive the secretKey, cache it on redis
+	   							if(chunk.secretKey)
+	   							{
+	   								redisClient.set(chunk.secretKey, feServerChunk.username, function(error, result) {
+		                                if (error) console.log('Error: ' + error);
+		                                else
+		                                {
+		                                	console.log('Successfully cached secretKey and username in redis');
+		                        			// TODO Read expiry time for redis from config file    
+		                                	redisClient.expire(chunk.secretKey, 300, function(error, didSetExpiry){
+				                            	if(didSetExpiry)
+				                            		console.log('Successfully set expiry time on redis for key ', feServerChunk.username);
+				                            	else if(!didSetExpiry)
+				                            		console.log('Key', chunk.secretKey, 'does not exist on redis server');
+				                            	else if(error)
+				                            		console.log('Error: ' + error);
+				                            });	
+		                                } 
+	                            	});
+	   							}
 	   						}
 	   						else
 	   						{
@@ -123,18 +143,21 @@ http.createServer(function (req, res) {
 								// TODO Cache the signinToken in redis
 	                            redisClient.set(feServerChunk.username, signinToken, function(error, result) {
 	                                if (error) console.log('Error: ' + error);
-	                                else console.log('Successfully cached username and signinToken in redis');
+	                                else
+	                                {
+	                                	console.log('Successfully cached username and signinToken in redis');
+	                                	// TODO Expire after 900 seconds (15 minutes)
+			                            redisClient.expire(feServerChunk.username, 900, function(error, didSetExpiry){
+			                            	if(didSetExpiry)
+			                            		console.log('Successfully set expiry time on redis for key ', feServerChunk.username);
+			                            	else if(!didSetExpiry)
+			                            		console.log('Key', feServerChunk.username, 'does not exist on redis server');
+			                            	else if(error)
+			                            		console.log('Error: ' + error);
+			                            });
+	                                }
 	                            });
-	                            
-	                            // TODO Expire after 900 seconds (15 minutes)
-	                            redisClient.expire(feServerChunk.username, 900, function(error, didSetExpiry){
-	                            	if(didSetExpiry)
-	                            		console.log('Successfully set expiry time on redis for key ', feServerChunk.username);
-	                            	else if(!didSetExpiry)
-	                            		console.log('Key', feServerChunk.username, 'does not exist on redis server');
-	                            	else if(error)
-	                            		console.log('Error: ' + error);
-	                            });
+	                           
 	                            // TODO check to see if we can get it, will remove it later
 	                            redisClient.get(feServerChunk.username, function(error, result) {
 	                                if (error) console.log('Error: '+ error);
@@ -161,35 +184,60 @@ http.createServer(function (req, res) {
 				authServerRequest.end();
 			}
 			// We will be sent a secret key (all plain text at this point), and deserialize this data
-			// Example url: http://127.0.0.1:1337/?queryType=verification
-			// BODY secretkey=abcd
+			// Example url: http://127.0.0.1:1337/?queryType=verification&&secretkey=abcd
 			
 			else if(queryData.queryType == "verification")
 			{
 				console.log('This is a verification session.............');
 				
-				if(feServerChunk.secretkey)
+				if(queryData.secretkey)
 				{
-					console.log('Secret Key: ' + feServerChunk.secretkey);
-					// Pass this key to the auth server
+					console.log('Secret Key: ' + queryData.secretkey);
+
+					// Match this secretyKey with the one on redis cache
+					// If it hasn't expired yet, delete it
+					// If it has, ask authServer
+					// Pass this secretKey to the auth server
+					redisClient.get(queryData.secretKey, function(error, result) {
+                        if (error) 
+                        {
+                        	console.log('Error: '+ error);
+                        	console.log('Oops! Verification link has already expired! Please sign up again');
+                        	//TODO Removehardcoded error message?
+                        	JSONresponse.statusCode = -60;
+                        	JSONresponse.message = "Verification failed, link expired!";
+                        	writeResponse(res, JSONresponse.statusCode, JSONresponse);
+                        }
+                        else
+                        {
+                        	console.log('secretKey:' + queryData.secretKey + ', username: ' + result);
+                        	redisClient.del(queryData.secretKey, function(error, result) {
+		                        if (error) console.log('Error: '+ error);
+		                        else console.log('Successfully deleted ' + 'secretKey:' + queryData.secretKey + ', username: ' + result);
+		                    });
+                        } 
+                    });
+
+
+					// TODO check to see if we can get it, (THIS IS SUPPOSED TO FAIL) will remove it later
+                    redisClient.get(queryData.secretKey, function(error, result) {
+                        if (error) console.log('Error: '+ error);
+                        else console.log('secretKey:' + queryData.secretKey + ', username: ' + result);
+                    });
+
+
+
+                    // Successfully deleted valid secretKey from redis, now lets ask authServer to do the same
 					var options = {
 					    host: servers.authServer.host,
 					    port: servers.authServer.port,
 					    path: req.url,
 					    method: 'POST'
 					};
-					var postData = JSON.stringify(feServerChunk);
 					// connect to the Auth server
 					console.log('Connecting to auth server.....');
 					var authServerRequest = http.request(options, function(authServerResponse) {
-						
-						// Successfully made connection to auth server
-						// Now we check the response to see if the emailed link has expired or not
-						// if it didn't, the user is officially IN
-						// if not, notify about failure, and ask him to sign up again
-						// In either case, we might have to do some stuff in MySQL/Redis
 
-						// Print contents of the response received
 		  				displayResponse(authServerResponse); 
 		  				if(authServerResponse.statusCode == 200)
 		  				{
@@ -219,7 +267,7 @@ http.createServer(function (req, res) {
 				}
 				else
 				{
-					errorMessage('no secretkey specified', 400, res);
+					errorMessage('no secretKey specified', 400, res);
 				}
 			}
 
@@ -262,10 +310,9 @@ http.createServer(function (req, res) {
 	   						if(chunk.statusCode == 0)
 	   						{
 	   							console.log('signout successful');
-	   							// TODO Remove the session id from redis
 	                            redisClient.del(feServerChunk.username, function(error, result) {
 	                                if (error) console.log('Error: '+ error);
-	                                else console.log('username:' + feServerChunk.username + ', signinToken: ' + result);
+	                                else console.log('Successfully deleted ' + 'username:' + feServerChunk.username + ', signinToken: ' + result);
 	                            });
 
 	   							// TODO check to see if we can get it, (THIS IS SUPPOSED TO FAIL) will remove it later
