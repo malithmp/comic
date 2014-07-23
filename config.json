@@ -1,7 +1,7 @@
 {
   "servers":{
     "feServer":{
-      "host":"localhost",
+      "host":"192.168.0.150",
       "port":1337
     },
     
@@ -12,12 +12,12 @@
     },
     
     "notifServer":{
-      "host":"localhost",
+      "host":"192.168.0.150",
       "port":1339
     },
     
     "dbServer":{
-      "host":"localhost",
+      "host":"192.168.0.150",
       "port":1340,
       "tokenExpiry":86400,
       "mysqlHost":"localhost",
@@ -27,7 +27,7 @@
     },
     
     "FTPServer":{
-      "host":"localhost",
+      "host":"192.168.0.150",
       "port":1341
     }
   }

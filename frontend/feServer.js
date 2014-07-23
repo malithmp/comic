@@ -7,11 +7,11 @@ var querystring = require('querystring');
 var crypto = require('crypto');
 var redis = require("redis");
 var fs = require('fs');
-var serverConfigFile = "../serverConfigFile.json";
+var serverConfigFile = "../config.json";
 var config = {};
 // Read the config file SYNCHRONOUSLY to get server configuration info into config object, for use all throughout
 config["servers"] = JSON.parse(fs.readFileSync(serverConfigFile, 'utf8'));
-var servers = config.servers.Servers;
+var servers = config.servers.servers;
 
 http.createServer(function (req, res) {
 	

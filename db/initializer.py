@@ -24,6 +24,21 @@
 # seca1 is the answer to security q1
 # seca2 is the answer to security q2
 
+# user_album
+# username
+# album name -  unique per user, not unique among users [user cannot have the same album name repeated,] but two users can have albums with the same name
+# album id - unique id for each albums
+# num_img - bnumber of images in this album
+
+# album_image
+# order - 1srst image of the album will have a lower value, last will have a higher value, Images must be added in order
+# albumid - incremented id from the user_album tablke
+# imageid - image if deom the images table
+
+# images
+# filename
+# imageid
+
 import os
 import sys
 import json
@@ -132,6 +147,36 @@ def initialize():
 	result=os.popen(command).read()
 	print(result)
 
+        # user_album
+	cmd='use '+database+'; create table user_album(username varchar(32) not null, albumname varchar(256) not null,albumid int key auto_increment, numimg int not null);'
+	command='mysql -u '+username+' -p'+password+' -e \"'+cmd+'\" 2>&1'
+  	result=os.popen(command).read()
+
+	cmd='use '+database+'; show columns from user_album;'
+	command='mysql -u '+username+' -p'+password+' -e \"'+cmd+'\" 2>&1'
+	result=os.popen(command).read()
+	print(result)
+
+	# album_image
+	cmd='use '+database+'; create table album_image(order int primary key auto_increment ,albumid int not null, imageid int not null);'
+	command='mysql -u '+username+' -p'+password+' -e \"'+cmd+'\" 2>&1'
+	result=os.popen(command).read()
+
+	cmd='use '+database+'; show columns from album_image;'
+	command='mysql -u '+username+' -p'+password+' -e \"'+cmd+'\" 2>&1'
+	result=os.popen(command).read()
+	print(result)
+
+	# images
+	cmd='use '+database+'; create table images(imageid int primary key auto_increment , filename varchar(256) unique not null);'
+	command='mysql -u '+username+' -p'+password+' -e \"'+cmd+'\" 2>&1'
+	result=os.popen(command).read()
+
+	cmd='use '+database+'; show columns from user_tokens;'
+	command='mysql -u '+username+' -p'+password+' -e \"'+cmd+'\" 2>&1'
+	result=os.popen(command).read()
+	print(result)
+	
 	# Add dummy username hash salt combo: defultuser, defaultpass (hashed with salt)
 	cmd='use '+database+'; insert into user_hash_salt values(null,\''+defaults['defaultUser']+'\',\''+defaults['defaultHash']+'\',\''+defaults['defaultSalt']+'\');'
 	command='mysql -u '+username+' -p'+password+' -e \"'+cmd+'\" 2>&1'
