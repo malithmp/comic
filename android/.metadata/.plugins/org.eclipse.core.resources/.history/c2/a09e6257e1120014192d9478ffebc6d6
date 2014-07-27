@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">comic</string>
+    <string name="splash_msg">This is the splash screen!</string>
+    <string name="action_settings">Settings</string>
+
+</resources>
