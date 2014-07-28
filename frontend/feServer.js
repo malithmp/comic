@@ -267,7 +267,9 @@ http.createServer(function (req, res) {
 				}
 				else
 				{
-					errorMessage('no secretKey specified', 400, res);
+					JSONresponse.statusCode = -61;
+					JSONresponse.message = "no secretKey specified";
+					errorMessage(JSONresponse, 400, res);
 				}
 			}
 
@@ -276,7 +278,7 @@ http.createServer(function (req, res) {
 			else if(queryData.queryType == "signout")
 			{
 				console.log('This is a signout session.....');		
-				checkSignOutParams(feServerChunk, res, redisClient);
+				checkSignOutParams(feServerChunk, res, redisClient, JSONresponse);
 				//signinToken = checkToken(feServerChunk, res, redisClient, JSONresponse); 
 				checkToken(feServerChunk, res, redisClient, JSONresponse, function(error, result){
 					
@@ -346,12 +348,16 @@ http.createServer(function (req, res) {
 			}
 			else
 			{
-				errorMessage('queryType is invalid', 400, res);
+				JSONresponse.statusCode = -1;
+				JSONresponse.message = "queryType is invalid";
+				errorMessage(JSONresponse, 400, res);
 			}
 		}
 		else
 		{
-			errorMessage('no queryType specified', 400, res);
+			JSONresponse.statusCode = -99;
+			JSONresponse.message = "no queryType specified";
+			errorMessage(JSONresponse, 400, res);
 		}
 
 
@@ -362,15 +368,13 @@ http.createServer(function (req, res) {
 }).listen(servers.feServer.port, servers.feServer.host);
 console.log('front end Server running at', servers.feServer.host + ':' + servers.feServer.port);
 
-function errorMessage(message, statusCode, response)
+function errorMessage(JSONresponse, statusCode, response)
 {
-	console.log(message);
-	response.writeHead(statusCode, {'Content-Type': 'text/plain'});
-	response.end(message + '\n');
-
+	console.log(JSONresponse.message);
+	writeResponse(response, statusCode, JSONresponse);
 }
 
-function validateUsername(username, response)
+function validateUsername(username, response, JSONresponse)
 {
 	// Need regex to verify validity of username
 	// TODO Regex doesn't work
@@ -383,7 +387,9 @@ function validateUsername(username, response)
 	}
 	else
 	{	
-		errorMessage('Username invalid', 400, response);
+		JSONresponse.statusCode = -11;
+		JSONresponse.message = "Username invalid";
+		errorMessage(JSONresponse, 400, res);
 	}
 }
 
@@ -412,11 +418,13 @@ function checkSignInParams(body, response, JSONresponse)
 	if(body.username)
 	{
 		console.log('Username: ' + body.username);
-		validateUsername(body.username, response);
+		validateUsername(body.username, response, JSONresponse);
 	}
 	else
 	{
-		errorMessage('no username specified', 400, response);
+		JSONresponse.statusCode = -12;
+		JSONresponse.message = "no username specified";
+		errorMessage(JSONresponse, 400, res);
 	}
 	
 	if(body.password)
@@ -425,7 +433,9 @@ function checkSignInParams(body, response, JSONresponse)
 	}
 	else
 	{
-		errorMessage('no password specified', 400, response);
+		JSONresponse.statusCode = -31;
+		JSONresponse.message = "no password specified";
+		errorMessage(JSONresponse, 400, res);
 	}
 
 	if(body.signinToken)
@@ -446,11 +456,13 @@ function checkSignInParams(body, response, JSONresponse)
 	}
 	else
 	{
-		errorMessage('no signinToken specified', 400, response);
+		JSONresponse.statusCode = -52;
+		JSONresponse.message = "no signinToken specified";
+		errorMessage(JSONresponse, 400, res);
 	}
 
 }
-function checkSignOutParams(body, response, redisClient)
+function checkSignOutParams(body, response, redisClient, JSONresponse)
 {
 	if(body.username)
 	{
@@ -458,7 +470,9 @@ function checkSignOutParams(body, response, redisClient)
 	}
 	else
 	{
-		errorMessage('no username specified', 400, response);
+		JSONresponse.statusCode = -12;
+		JSONresponse.message = "no username specified";
+		errorMessage(JSONresponse, 400, res);	
 	}
 	if(body.signinToken)
 	{
@@ -466,7 +480,9 @@ function checkSignOutParams(body, response, redisClient)
 	}
 	else
 	{
-		errorMessage('no signinToken specified', 400, response);
+		JSONresponse.statusCode = -52;
+		JSONresponse.message = "no signinToken specified";
+		errorMessage(JSONresponse, 400, res);	
 	}
 }
 
@@ -475,11 +491,13 @@ function checkSignUpParams(body, response)
 	if(body.username)
 	{
 		console.log('Username: ' + body.username);
-		validateUsername(body.username,response);
+		validateUsername(body.username,response, JSONresponse);
 	}
 	else
 	{
-		errorMessage('no username specified', 400, response);
+		JSONresponse.statusCode = -12;
+		JSONresponse.message = "no username specified";
+		errorMessage(JSONresponse, 400, res);	
 	}
 	if(body.password)
 	{
@@ -488,7 +506,9 @@ function checkSignUpParams(body, response)
 	}
 	else
 	{
-		errorMessage('no password specified', 400, response);
+		JSONresponse.statusCode = -31;
+		JSONresponse.message = "no password specified";
+		errorMessage(JSONresponse, 400, res);	
 	}
 	
 	// Might wanna check validity of email? Or not....
@@ -498,7 +518,9 @@ function checkSignUpParams(body, response)
 	}
 	else
 	{
-		errorMessage('no email specified', 400, response);
+		JSONresponse.statusCode = -13;
+		JSONresponse.message = "no emai specified";
+		errorMessage(JSONresponse, 400, res);	
 	}
 
 }
