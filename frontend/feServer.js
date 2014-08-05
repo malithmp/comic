@@ -395,7 +395,8 @@ function validateUsername(username, response, JSONresponse)
 
 function writeResponse(response, statusCode, JSONresponse)
 {
-	response.writeHead(statusCode, {'Content-Type': 'text/plain'});
+	// always write 200 in HTTP status code
+	response.writeHead(200, {'Content-Type': 'text/plain'});
 	response.write(JSON.stringify(JSONresponse));
 	response.end();	
 }
