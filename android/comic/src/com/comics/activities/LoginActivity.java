@@ -36,5 +36,8 @@ public class LoginActivity extends ActionBarActivity {
 		return super.onOptionsItemSelected(item);
 	}
 	
-
+	public void loginPressed(View v){
+		Intent intent = new Intent(this, ScreenSlidePagerActivity.class);
+		startActivity(intent);
+	}
 }

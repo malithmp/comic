@@ -29,7 +29,8 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/textView2"
-        android:text="Login" />
+        android:text="Login"
+        android:onClick="loginPressed" />
 
     <TextView
         android:id="@+id/textView1"

@@ -6,5 +6,12 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="login_msg">This is the login screen!</string>
-
+    <string name="title_activity_photo">PhotoActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_view_pager">ViewPager</string>
+    <string name="title_activity_screen_slide_pager">ScreenSlidePagerActivity</string>
+    <string name="title_activity_screen_slide">ScreenSlide</string>
+    <string name="title_activity_show_pictures">showPictures</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

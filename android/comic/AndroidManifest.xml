@@ -3,9 +3,10 @@
     package="com.comics.comic"
     android:versionCode="1"
     android:versionName="1.0" >
-
+	<uses-permission android:name="android.permission.CAMERA"/>
+	<uses-feature android:name="android.hardware.camera"/>
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="15"
         android:targetSdkVersion="21" />
 
     <application
@@ -25,6 +26,22 @@
         <activity
             android:name="com.comics.activities.LoginActivity"
             android:label="@string/title_activity_login" >
+        </activity>
+        <activity
+            android:name="com.comics.activities.PhotoActivity"
+            android:label="@string/title_activity_photo" >
+        </activity>
+        <activity
+            android:name="com.comics.activities.ViewPager"
+            android:label="@string/title_activity_view_pager" >
+        </activity>
+        <activity
+            android:name="com.comics.activities.ScreenSlidePagerActivity"
+            android:label="@string/title_activity_screen_slide_pager" >
+        </activity>
+        <activity
+            android:name="com.comics.activities.ScreenSlide"
+            android:label="@string/title_activity_screen_slide" >
         </activity>
     </application>
 
