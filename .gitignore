@@ -3,3 +3,14 @@
 .metadata/*
 android/.metadata/*
 *.class
+android/comic/bin
+android/comic/gen
+*.apk
+*.ap_
+*.dex
+android/local.properties
+*.project
+*.tmp
+*.bak
+*.swp
+*.classpath
