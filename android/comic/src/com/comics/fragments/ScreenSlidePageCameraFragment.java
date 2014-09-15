@@ -1,12 +1,16 @@
 package com.comics.fragments;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.Build;
@@ -24,14 +28,16 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
+import com.comics.activities.ScreenSlidePageFragmentCommunicator;
 import com.comics.comic.R;
 
 public class ScreenSlidePageCameraFragment extends Fragment implements OnClickListener{
-
+	ScreenSlidePageFragmentCommunicator communicator;
 	Camera camera = null;
 	Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
 	CameraPreview cameraPreview = null;
-
+	
+	Bitmap oneimage=null; //TODO remove this and add an array of size 4 to hold the images
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
@@ -39,15 +45,17 @@ public class ScreenSlidePageCameraFragment extends Fragment implements OnClickLi
 		Button cross = (Button) rootView.findViewById(R.id.button_cross);
 		ImageButton tick = (ImageButton) rootView.findViewById(R.id.button_tick);
 		ImageButton nextPhoto =  (ImageButton) rootView.findViewById(R.id.button_next_photo);
-		
+
 		Button takepicture = (Button) rootView.findViewById(R.id.button_capture);
 		takepicture.setOnClickListener(this);
-		
+
 		cross.setVisibility(View.INVISIBLE);
 		tick.setVisibility(View.INVISIBLE);
 		nextPhoto.setVisibility(View.INVISIBLE);
 
-		camera = getCameraInstance();
+		if (camera==null){
+			camera = getCameraInstance();
+		}
 
 		camera.setDisplayOrientation(90);
 
@@ -60,12 +68,18 @@ public class ScreenSlidePageCameraFragment extends Fragment implements OnClickLi
 		return rootView;
 	}
 
+	@Override
+	public void onAttach(Activity activity) {
+		communicator=(ScreenSlidePageFragmentCommunicator)activity;
+		super.onAttach(activity);
+	}
+	
 	/*
 	 * 
 	 * EVERYTHING RELATED TO THE CAMERA
 	 * 
 	 * */
-
+	
 
 	/** A safe way to get an instance of the Camera object. */
 	public static Camera getCameraInstance(){
@@ -201,6 +215,17 @@ public class ScreenSlidePageCameraFragment extends Fragment implements OnClickLi
 		@Override
 		public void onPictureTaken(byte[] data, Camera camera)
 		{
+			// First convert the byte stream to a bitmap
+
+			ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
+			Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+			oneimage = Bitmap.createScaledBitmap(bitmap, 300, 300, false);
+			
+			communicator.updatePreviewImage(oneimage); // this will call the activities updateImages
+			//ImageView picture = new ImageView(this);
+			//picture.setImageBitmap(bitmap);
+			Log.d("Meh","DONE CAPTURING ");
+			
 			// TODO Implement an algorithm to use internal storage instead of external storage
 			FileOutputStream outputStream;
 			String filename = "myfile";
@@ -278,8 +303,6 @@ public class ScreenSlidePageCameraFragment extends Fragment implements OnClickLi
 	}
 	// Add a listener to the Capture button
 	public void capturePicture(View view) {
-		Log.d("meh","before");
-		Log.d("meh","after");
 		// Make capture and flip camera button disappear
 		Button button = (Button) view;
 		ImageButton flipCamera = (ImageButton) getView().findViewById(R.id.button_camera_flip);
@@ -294,7 +317,7 @@ public class ScreenSlidePageCameraFragment extends Fragment implements OnClickLi
 		tick.setVisibility(View.VISIBLE);
 		nextPhoto.setVisibility(View.VISIBLE);
 		// TODO get an image from the camera and save it
-		
+
 		camera.takePicture(null, null, picture);
 	}
 
@@ -377,6 +400,6 @@ public class ScreenSlidePageCameraFragment extends Fragment implements OnClickLi
 		default:
 			break;
 		}
-		
+
 	}
 }

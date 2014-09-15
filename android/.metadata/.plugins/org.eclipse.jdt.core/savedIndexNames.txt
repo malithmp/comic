@@ -1,2 +1,0 @@
-INDEX VERSION 1.126+/Users/malithmp/Documents/workspace_insta/android/.metadata/.plugins/org.eclipse.jdt.core
-2963250093.index
