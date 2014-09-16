@@ -42,23 +42,27 @@ public class ScreenSlidePageCameraFragment extends Fragment implements OnClickLi
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
 		ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_screen_slide_page_camera, container, false);
+		// Declare all buttons on the camera screen
 		Button cross = (Button) rootView.findViewById(R.id.button_cross);
 		ImageButton tick = (ImageButton) rootView.findViewById(R.id.button_tick);
-		ImageButton nextPhoto =  (ImageButton) rootView.findViewById(R.id.button_next_photo);
-
-		Button takepicture = (Button) rootView.findViewById(R.id.button_capture);
-		takepicture.setOnClickListener(this);
-
+		ImageButton nextPhoto =  (ImageButton) rootView.findViewById(R.id.button_next_photo);		
+		Button takePicture = (Button) rootView.findViewById(R.id.button_capture);
+		
+		// Set on click listeners for the buttons dynamically
+		takePicture.setOnClickListener(this);
+		cross.setOnClickListener(this);
+		tick.setOnClickListener(this);
+		nextPhoto.setOnClickListener(this);
+		
+		// Make cross, tick and nextPhoto buttons invisible
 		cross.setVisibility(View.INVISIBLE);
 		tick.setVisibility(View.INVISIBLE);
 		nextPhoto.setVisibility(View.INVISIBLE);
 
-		if (camera==null){
-			camera = getCameraInstance();
-		}
 
+		// Initialize the camera
+		camera = getCameraInstance();
 		camera.setDisplayOrientation(90);
-
 
 		// Create our Preview view and set it as the content of our activity.
 		cameraPreview = new CameraPreview(getActivity().getApplicationContext(), camera);
@@ -141,7 +145,7 @@ public class ScreenSlidePageCameraFragment extends Fragment implements OnClickLi
 			// If your preview can change or rotate, take care of those events here.
 			// Make sure to stop the preview before resizing or reformatting it.
 
-			System.out.println("THIS SHOULD NEVER HAPPEN: Surface has been changed");
+			System.out.println("BLAH Surface has been changed");
 			if (mHolder.getSurface() == null){
 				// preview surface does not exist
 				return;
@@ -170,45 +174,6 @@ public class ScreenSlidePageCameraFragment extends Fragment implements OnClickLi
 
 	public static final int MEDIA_TYPE_IMAGE = 1;
 	public static final int MEDIA_TYPE_VIDEO = 2;
-	/** Create a file Uri for saving an image or video */
-
-	//private static Uri getOutputMediaFileUri(int type){
-	//    return Uri.fromFile(getOutputMediaFile(type));
-	//}
-
-	/** Create a File for saving an image or video */
-	private static File getOutputMediaFile(int type){
-		// To be safe, you should check that the SDCard is mounted
-		// using Environment.getExternalStorageState() before doing this.
-
-		File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-				Environment.DIRECTORY_PICTURES), "comixtripCamera");
-		// This location works best if you want the created images to be shared
-		// between applications and persist after your app has been uninstalled.
-
-		// Create the storage directory if it does not exist
-		if (! mediaStorageDir.exists()){
-			if (! mediaStorageDir.mkdirs()){
-				Log.d("comixtripCamera", "failed to create directory");
-				return null;
-			}
-		}
-
-		// Create a media file name
-		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-		File mediaFile;
-		if (type == MEDIA_TYPE_IMAGE){
-			mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-					"IMG_"+ timeStamp + ".jpg");
-		} else if(type == MEDIA_TYPE_VIDEO) {
-			mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-					"VID_"+ timeStamp + ".mp4");
-		} else {
-			return null;
-		}
-
-		return mediaFile;
-	}
 
 	private PictureCallback picture = new PictureCallback() {
 
@@ -230,36 +195,23 @@ public class ScreenSlidePageCameraFragment extends Fragment implements OnClickLi
 			FileOutputStream outputStream;
 			String filename = "myfile";
 			try {
-				//outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-				//outputStream.write(data);
-				//outputStream.close();
-				//System.out.println("Successfully created file in path" + getFilesDir());
+				// TODO Save image here, and use Malith's function to scale it down
+				/*
+				ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
+				Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+				oneimage = Bitmap.createScaledBitmap(bitmap, 300, 300, false);
+				*/
 
 			} catch (Exception e) {
 				System.out.println("Failed to create file");
 				e.printStackTrace();
 			}
-			/*
-            File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
-            if (pictureFile == null){
-                Log.d(TAG, "Error creating media file, check storage permissions");
-                return;
-            }
-
-            try {
-                FileOutputStream fos = new FileOutputStream(pictureFile);
-                fos.write(data);
-                fos.close();
-            } catch (FileNotFoundException e) {
-                Log.d(TAG, "File not found: " + e.getMessage());
-            } catch (IOException e) {
-                Log.d(TAG, "Error accessing file: " + e.getMessage());
-            }
-			 */
-		}
+			}
 
 	};
+	
 	// Add a listener to the camera flip button
+	// TODO Doesn't work
 	public void flipCamera(View view)
 	{
 		int numberOfCameras = camera.getNumberOfCameras();
@@ -296,11 +248,7 @@ public class ScreenSlidePageCameraFragment extends Fragment implements OnClickLi
 			System.out.println("Camera IDs not initialized");
 		}
 	}
-	// Add a listener to the Next Photo button
-	public void nextPhoto(View view)
-	{
-
-	}
+	
 	// Add a listener to the Capture button
 	public void capturePicture(View view) {
 		// Make capture and flip camera button disappear
@@ -317,61 +265,81 @@ public class ScreenSlidePageCameraFragment extends Fragment implements OnClickLi
 		tick.setVisibility(View.VISIBLE);
 		nextPhoto.setVisibility(View.VISIBLE);
 		// TODO get an image from the camera and save it
-
 		camera.takePicture(null, null, picture);
 	}
 
 	// Add a listener to the tick button
-	public void donePictures(View view) {
+	public void donePicture(View view) {
 		// TODO Switch to the view which shows you a max of 4 photos in a pallete
+		Log.d("meh","donePicture");
+		// Reload the camera preview and sends the current photo to Malith
+		// Create our Preview view and set it as the content of our activity.
+		View rootView = getView();
+		// Declare all buttons on the camera screen
+		Button cross = (Button) rootView.findViewById(R.id.button_cross);
+		ImageButton tick = (ImageButton) rootView.findViewById(R.id.button_tick);
+		ImageButton nextPhoto =  (ImageButton) rootView.findViewById(R.id.button_next_photo);		
+		Button takePicture = (Button) rootView.findViewById(R.id.button_capture);
+		// Make cross, tick and nextPhoto buttons invisible
+		cross.setVisibility(View.INVISIBLE);
+		tick.setVisibility(View.INVISIBLE);
+		nextPhoto.setVisibility(View.INVISIBLE);
+		takePicture.setVisibility(View.VISIBLE);
+		camera.startPreview();
+
 	}
 	// Add a listener to the cross button
 	public void cancelPicture(View view) {
 		// TODO Deletes the current photo and goes back to camera preview
+		Log.d("meh","cancelPicture");
+		// Reload the camera preview and sends the current photo to Malith
+		// Create our Preview view and set it as the content of our activity.
+		View rootView = getView();
+		// Declare all buttons on the camera screen
+		Button cross = (Button) rootView.findViewById(R.id.button_cross);
+		ImageButton tick = (ImageButton) rootView.findViewById(R.id.button_tick);
+		ImageButton nextPhoto =  (ImageButton) rootView.findViewById(R.id.button_next_photo);		
+		Button takePicture = (Button) rootView.findViewById(R.id.button_capture);
+		// Make cross, tick and nextPhoto buttons invisible
+		cross.setVisibility(View.INVISIBLE);
+		tick.setVisibility(View.INVISIBLE);
+		nextPhoto.setVisibility(View.INVISIBLE);
+		takePicture.setVisibility(View.VISIBLE);
+		camera.startPreview();
+
+	}
+	
+	// Add a listener to the Next Photo button
+	public void nextPhoto(View view)
+	{
+		Log.d("meh","nextPhoto");
+		// Reload the camera preview and sends the current photo to Malith
+		// Create our Preview view and set it as the content of our activity.
+		View rootView = getView();
+		// Declare all buttons on the camera screen
+		Button cross = (Button) rootView.findViewById(R.id.button_cross);
+		ImageButton tick = (ImageButton) rootView.findViewById(R.id.button_tick);
+		ImageButton nextPhoto =  (ImageButton) rootView.findViewById(R.id.button_next_photo);		
+		Button takePicture = (Button) rootView.findViewById(R.id.button_capture);
+		// Make cross, tick and nextPhoto buttons invisible
+		cross.setVisibility(View.INVISIBLE);
+		tick.setVisibility(View.INVISIBLE);
+		nextPhoto.setVisibility(View.INVISIBLE);
+		takePicture.setVisibility(View.VISIBLE);
+		// Initialize the camera again			
+		camera.startPreview();
 	}
 	// Add a listener to the Show Picture button
 	public void showPicture(View view) {
-		/*
-        FileOutputStream outputStream;
-        String filename = "myfile";
-        byte[] data;
-        try {
-            outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-            //outputStream.write(data);
-            outputStream.close();
-            System.out.println("Successfully created file in path" + getFilesDir());
-
-        } catch (Exception e) {
-            System.out.println("Failed to create file");
-            e.printStackTrace();
-        }
-		 */
+		// TODO Probably don't need this, remove it
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		releaseCamera();              // release the camera immediately on pause event
+		releaseCamera(); // release the camera immediately on pause event
 	}
 
-	/*
-
-    @Override
-    protected void onResume()
-    {
-        super.onResume();
-        System.out.println("Resuming app");
-        try
-        {
-            camera = getCameraInstance();
-            cameraPreview = new CameraPreview(this.getApplication(), camera);//set preview
-            RelativeLayout preview = (RelativeLayout) findViewById(R.id.camera_preview);
-            preview.addView(cameraPreview);
-        } catch (Exception e){
-            Log.d(TAG, "Error starting camera preview: " + e.getMessage());
-        }
-    }
-	 */
 
 	private void releaseCamera(){
 		if (camera != null){
@@ -397,9 +365,77 @@ public class ScreenSlidePageCameraFragment extends Fragment implements OnClickLi
 		case R.id.button_capture:
 			capturePicture(v);
 			break;
+		case R.id.button_next_photo:
+			nextPhoto(v);
+			break;
+		case R.id.button_tick:
+			donePicture(v);
+			break;
+		case R.id.button_cross:
+			Log.d("meh","Button Cross!");
+			cancelPicture(v);
+			break;
 		default:
 			break;
 		}
 
 	}
+	
+	/*
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        System.out.println("Resuming app");
+        try
+        {
+            camera = getCameraInstance();
+            cameraPreview = new CameraPreview(this.getApplication(), camera);//set preview
+            RelativeLayout preview = (RelativeLayout) findViewById(R.id.camera_preview);
+            preview.addView(cameraPreview);
+        } catch (Exception e){
+            Log.d(TAG, "Error starting camera preview: " + e.getMessage());
+        }
+    }
+	 */
+
+	
+	// TODO POTENTIALLY CRAP
+
+	/** Create a File for saving an image or video */
+	private static File getOutputMediaFile(int type){
+		// To be safe, you should check that the SDCard is mounted
+		// using Environment.getExternalStorageState() before doing this.
+
+		File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+				Environment.DIRECTORY_PICTURES), "comixtripCamera");
+		// This location works best if you want the created images to be shared
+		// between applications and persist after your app has been uninstalled.
+
+		// Create the storage directory if it does not exist
+		if (! mediaStorageDir.exists()){
+			if (! mediaStorageDir.mkdirs()){
+				Log.d("comixtripCamera", "failed to create directory");
+				return null;
+			}
+		}
+
+		// Create a media file name
+		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+		File mediaFile;
+		if (type == MEDIA_TYPE_IMAGE){
+			mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+					"IMG_"+ timeStamp + ".jpg");
+		} else if(type == MEDIA_TYPE_VIDEO) {
+			mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+					"VID_"+ timeStamp + ".mp4");
+		} else {
+			return null;
+		}
+
+		return mediaFile;
+	}
+	
+	
 }

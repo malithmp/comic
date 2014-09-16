@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_layout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+id/camera_preview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical" >
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/menu_layer"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <Button
+            android:id="@+id/button_capture"
+            android:layout_width="100dip"
+            android:layout_height="100dip"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:background="@drawable/round_button_clicked"
+            android:onClick="capturePicture" />
+
+        <ImageButton
+            android:id="@+id/button_tick"
+            android:layout_width="50dip"
+            android:layout_height="50dip"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/button_cross"
+            android:onClick="donePictures"
+            android:src="@drawable/tick_button_small" />
+
+        <ImageButton
+            android:id="@+id/button_camera_flip"
+            android:layout_width="50dip"
+            android:layout_height="50dip"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/button_cross"
+            android:onClick="flipCamera"
+            android:src="@drawable/camera_flip_button" />
+
+        <ImageButton
+            android:id="@+id/button_next_photo"
+            android:layout_width="50dip"
+            android:layout_height="50dip"
+            android:layout_alignTop="@+id/button_cross"
+            android:layout_toRightOf="@+id/button_capture"
+            android:background="@drawable/button_cross"
+            android:onClick="nextPhoto"
+            android:src="@drawable/next_photo_button" />
+
+        <Button
+            android:id="@+id/button_cross"
+            android:layout_width="80dip"
+            android:layout_height="80dip"
+            android:layout_above="@+id/button_capture"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="46dp"
+            android:background="@drawable/button_cross"
+            android:onClick="cancelPicture"
+            android:text="X"
+            android:textColor="@android:color/white"
+            android:textSize="80dp" />
+
+    </RelativeLayout>
+
+</FrameLayout>
